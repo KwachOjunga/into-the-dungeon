@@ -1,0 +1,4 @@
+[preprocessor.last-changed]
+command = "mdbook-last-changed"
+template = "Last change: {date} ([commit]({commit_url}))"
+date_format = "%Y-%m-%d"          # or "%B %d, %Y" for "March 08, 2026"
