@@ -1,8 +1,31 @@
+# [preprocessor.katex]
+# after = ["links"]
+# output = "html"
+# leqno = false
+# fleqn = false
+# throw-on-error = true
+# error-color = "#cc0000"
+# min-rule-thickness = -1.0
+# max-size = "Infinity"
+# max-expand = 1000
+# trust = false
+# # Extra options.
+# no-css = false
+# include-src = false
+# block-delimiter = { left = "$$", right = "$$" }
+# inline-delimiter = { left = "$", right = "$" }
+# pre-render = true
+
+[preprocessor.typst-math]
+
 [preprocessor.last-changed]
 command = "mdbook-last-changed"
 template = "Last change: {date} ([commit]({commit_url}))"
 date_format = "%Y-%m-%d"
-
+# [preprocessor.katex]
+# after = ["links"]
+# math-delimiters = ["$$", "$"]   # enables standard $$...$$ and $...$
+# inline-math-delimiters = ["$", "$"]
 
 [output.html]
 git-repository-url = "https://github.com/KwachOjunga/into-the-dungeon"
