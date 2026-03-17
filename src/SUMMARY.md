@@ -1,9 +1,10 @@
 - [Articles](./book/articles.md)
-  - [Hardware Patches](./book/OnHardwarePatches.md)
+  - [Hardware Patches](./book/articlesOnHardwarePatches.md)
 
 - [Shorts](./book/shorts.md)
-  - [On AI as a means](./book/guts.md)
+  - [On AI as a means](./book/shorts/guts.md)
 
 - [Appendices](./book/appendices.md)
-  - [Digital Logic](./book/digital.md)
+  - [Digital Logic](./book/appendices/digital.md)
   - [Compilers](./book/compiler.md)
+  - [LLVM-IR](./book/appendices/llvm_ir.md)

@@ -36,4 +36,3 @@ Yes, there is such a thing as microcode.
 
 
 [^1]: RTL - [Register Transfer Language](https://grokipedia.com/page/Register-transfer_level)
-      <!--[TLDR](./RTL.md)-->
