@@ -36,10 +36,10 @@
             const path_to_root = "";
             const default_light_theme = "ayu";
             const default_dark_theme = "ayu";
-            window.path_to_searchindex_js = "searchindex-7b1f3e7a.js";
+            window.path_to_searchindex_js = "searchindex-bdfc5e82.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-4a8b8975.js"></script>
+        <script src="toc-b65cb384.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -190,7 +190,7 @@
 
 </div>
 
-<footer id="last-change">Last change: <time datetime="2026-03-18">2026-03-18</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/535b4b8">535b4b8</a></footer><div style="break-before: page; page-break-before: always;"></div>
+<footer id="last-change">Last change: <time datetime="2026-03-18">2026-03-18</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/b36c503">b36c503</a></footer><div style="break-before: page; page-break-before: always;"></div>
 <h1 id="on-hardware-patches"><a class="header" href="#on-hardware-patches">On Hardware Patches.</a></h1>
 <hr>
 <pre><code>                                                                            08/03/2026
@@ -221,7 +221,7 @@ it is accessing, the signals it is sending among a whole slew of other technique
 So the solutions come in three forms, all being updates/patches.
 In software, hardware and microcode.</p>
 <p>Yes, there is such a thing as microcode.</p>
-<footer id="last-change-1">Last change: <time datetime="2026-03-18">2026-03-18</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/535b4b8">535b4b8</a></footer>
+<footer id="last-change-1">Last change: <time datetime="2026-03-18">2026-03-18</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/b36c503">b36c503</a></footer>
 <hr>
 <ol class="footnote-definition">
 <li id="footnote-1">
@@ -229,10 +229,75 @@ In software, hardware and microcode.</p>
 </li>
 </ol>
 <div style="break-before: page; page-break-before: always;"></div>
+<h1 id="coders-fright"><a href="#coders-fright" class="header">Coder's fright</a></h1>
+<h2 id="coders-fright-battling-your-inner-demons"><a class="header" href="#coders-fright-battling-your-inner-demons">Coder’s fright; Battling your inner demons</a></h2>
+<p>You know, in all the programming lore that i have come across, none of them
+talk about how difficult it can be to approach a new codebase.</p>
+<p>Ok, it is likely that my observation is biased by the fact that i am a beginner at this and the individuals that get to talk about stuff are experts.
+Probably there is a shift with increase in experience.</p>
+<p>Since the space that mathematics can describe is essentially infinite, i think the ability to be frightened by a codebase can be quantified by a function
+whose parameters are the relative size of the codebase and the average number of new concepts i will encounter per module.</p>
+<p>Of course there are other things like the language in which the codebase is written that will factor in like one’s mastery of the language
+and the degree of specificity<sup class="footnote-reference" id="fr-1-1-1"><a href="#footnote-1-1">1</a></sup> that the lanuage allows.</p>
+<p>So the size of the codebase will obviously determine the duration you have to spend
+nested in the codebase to have a firm grasp of it.
+New concepts establish the neccessity to be explored especially if they are heavily
+referenced or used in the implementation.
+These create detours that can often be deemed unneccessary since they don’t help in meeting the deadline.</p>
+<p>I’ll probably come back to the utility of such detours but as for now let us
+explore our newfound fear.</p>
+<p>So perhaps you are trying to be a systems engineer and there you are staring at a backend whose default mode of operation is with async executions and has also decided to use a threadpool in their implementation.</p>
+<p>If you are sufficiently green, you have a vague idea of what asynchronous execution
+means, and if you are lucky enough you have been exposed to it through languages like Go.
+You are unaware of synchronization primitives and your working assumption is all computation that has been
+parrallelized is in optimal working conditions.
+Threadpools to you are similar to unicorns.</p>
+<p>At this point the codebase is like a predator and you are its prey.
+Its primary intent is to crush your spirit and remind you of your inefficiencies.
+It shouts of your incompetence.</p>
+<p>You start looking into asynchrony. When you scratch its surface you come across the
+notion of a runtime, an executor and you learn of a way to mimic the operating
+system’s scheduler.</p>
+<p>Now to get to understanding the scheduler you have to go a layer deeper.
+It is there that you get a proper introduction to computer organization and its architecture.
+If you pay heed to the call of adventure you get thrown into a world filled with
+ISAs. The scales fall off your eyes and now what emerges is the realisation that “the
+world is way larger than the computer you are hunched over”.</p>
+<p>If you are a grown up, you cease the pursuit and retrace your steps. You have work to do.</p>
+<p>Personally that is where my kind of trouble begins because i have always found that going
+a layer deeper always yielded a better picture.</p>
+<p>Now, if you are going to understand a codebase there is getting familiar with the “literature”
+and then there is getting to understand the implications of the “literature” as applied or implemented.</p>
+<p>Grasping the implications requires a whole roadtrip. You play out the serial execution as it occurs in the codebase
+and verify the correctness or quality of emergent logic from the order of executions.</p>
+<p>Getting to that point alone can be immensely satisfying but now there is a kick to this kick.
+Now you want to modify the logic to enhance either perfomance or enhance usability by probably adding an extension.</p>
+<p>If you have ever traced a circuit using probes maybe you’ll relate to this. Adding an extension to the codebase is similar to knowing the exact places to tap in a closed circuit.
+It is like knowing exactly which points can i attach to and i get the exact expected output.</p>
+<p>The real kick is probably in enhancing performance. To enhance perfomance you have to breakdown the implementation detail.</p>
+<p>From an operation that was simply responding to requests to access files to picturing
+threads (async or otherwise) that are listening to requests make a malloc call to allocate a buffer,
+read a file into that buffer before transmitting it through the sockets.
+Now you have to figure out where is it that you wasting time in and why.
+Once you have found out you make a point of probably not touching the memory as often if memory was the bottleneck or
+you decide to switch the allocator all together.
+If that’s not enough and you have sufficient memory, you probably make the opening
+of certain frequently accessed texts to be opened early enough to prevent several consecutive syscalls.</p>
+<p>There is probably a trick about maintaining socket liveness to escape the handshake thing but anyway.
+Those who are serious enough switch to io-uring.</p>
+<p>I believe that it is in the pursuit of this kick that optimization engineers live.</p>
+<footer id="last-change-2">Last change: <time datetime="2026-03-18">2026-03-18</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/b36c503">b36c503</a></footer>
+<hr>
+<ol class="footnote-definition">
+<li id="footnote-1-1">
+<p>Certain languages particularly low level ones allow you to have more control of how your data will be computed. This is achieved mostly using compiler intrinsics or lints like those that enforce a particular data alignment. <a href="#fr-1-1-1">↩</a></p>
+</li>
+</ol>
+<div style="break-before: page; page-break-before: always;"></div>
 <h1 id="shorts"><a class="header" href="#shorts">Shorts</a></h1>
 <hr>
 <p>A select section of random thoughts that do not exactly fit as articles.</p>
-<footer id="last-change-2">Last change: <time datetime="2026-03-18">2026-03-18</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/535b4b8">535b4b8</a></footer><div style="break-before: page; page-break-before: always;"></div>
+<footer id="last-change-3">Last change: <time datetime="2026-03-18">2026-03-18</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/b36c503">b36c503</a></footer><div style="break-before: page; page-break-before: always;"></div>
 <h1 id="ai-as-a-means"><a href="#ai-as-a-means" class="header">AI as a means</a></h1>
 <h3 id="on-the-guts-of-computing"><a class="header" href="#on-the-guts-of-computing">On the guts of computing</a></h3>
 <p>In as much as i have gathered so far i think this is it. The core attribute of computers is this;
@@ -246,13 +311,13 @@ within a particular domain tend to stem from a central core.</p>
 <p>Let this collapse into the domain religion.
 If as humanity what we actually describe as a being we are incapable of fathoming as God, are we
 in essence creating the tool that will enable us have a picture of what that idea means?</p>
-<footer id="last-change-3">Last change: <time datetime="2026-03-18">2026-03-18</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/535b4b8">535b4b8</a></footer><div style="break-before: page; page-break-before: always;"></div>
+<footer id="last-change-4">Last change: <time datetime="2026-03-18">2026-03-18</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/b36c503">b36c503</a></footer><div style="break-before: page; page-break-before: always;"></div>
 <h1 id="appendices"><a class="header" href="#appendices">Appendices</a></h1>
 <p>Some things you may find useful.</p>
 <ul>
 <li><a href="#llvm-ir">LLVM-IR reference. Instruction syntax and intrinsics.</a></li>
 </ul>
-<footer id="last-change-4">Last change: <time datetime="2026-03-18">2026-03-18</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/535b4b8">535b4b8</a></footer><div style="break-before: page; page-break-before: always;"></div>
+<footer id="last-change-5">Last change: <time datetime="2026-03-18">2026-03-18</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/b36c503">b36c503</a></footer><div style="break-before: page; page-break-before: always;"></div>
 <h1 id="digital-logic"><a href="#digital-logic" class="header">Digital Logic</a></h1>
 <h2 id="constructs-used-in-digital-circuit-optimization"><a class="header" href="#constructs-used-in-digital-circuit-optimization">Constructs used in digital circuit optimization</a></h2>
 <ul>
@@ -1409,7 +1474,7 @@ in essence creating the tool that will enable us have a picture of what that ide
 </svg>
 </div>
 
-<footer id="last-change-5">Last change: <time datetime="2026-03-18">2026-03-18</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/535b4b8">535b4b8</a></footer><div style="break-before: page; page-break-before: always;"></div>
+<footer id="last-change-6">Last change: <time datetime="2026-03-18">2026-03-18</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/b36c503">b36c503</a></footer><div style="break-before: page; page-break-before: always;"></div>
 <h1 id="core"><a class="header" href="#core">Core</a></h1>
 <ul>
 <li>Control Flow Graphs</li>
@@ -1426,7 +1491,7 @@ in essence creating the tool that will enable us have a picture of what that ide
 <li>Inlining</li>
 <li>Instruction scheduling</li>
 </ul>
-<footer id="last-change-6">Last change: <time datetime="2026-03-18">2026-03-18</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/535b4b8">535b4b8</a></footer><div style="break-before: page; page-break-before: always;"></div>
+<footer id="last-change-7">Last change: <time datetime="2026-03-18">2026-03-18</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/b36c503">b36c503</a></footer><div style="break-before: page; page-break-before: always;"></div>
 <h1 id="llvm-ir"><a href="#llvm-ir" class="header">LLVM-IR</a></h1>
 <p>A set of llvm’s internals illustrating their usages and syntax.</p>
 <p>Categories</p>
@@ -1602,7 +1667,7 @@ The return type must be of a first class type so basically it must be of the pri
 <p>From the langref :- “Depending on properties of the target machine and the particular switch instruction, this instruction may be code generated in different ways. For example, it could be generated as a series of chained conditional branches or with a lookup table.”</p>
 <h2 id="linkages"><a class="header" href="#linkages">Linkages</a></h2>
 <p>These appear to be information being passed to the linker.</p>
-<footer id="last-change-7">Last change: <time datetime="2026-03-18">2026-03-18</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/535b4b8">535b4b8</a></footer>
+<footer id="last-change-8">Last change: <time datetime="2026-03-18">2026-03-18</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/b36c503">b36c503</a></footer>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
