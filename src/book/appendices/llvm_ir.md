@@ -66,7 +66,7 @@
         ret void        
     }
    ```
-  actual rustc output
+  Actual rustc output with the added difference of printing the output to stdout
      
    ```llvm-ir
       ; great::main
@@ -130,7 +130,9 @@
       }
       
    ```
-     
+   If you are keen you'll notice no defined variable is re-assigned twice.
+   In SSA there is no concept of shadowing. Each defined variable has to be the only instance of its initialization; 
+   reusing it requires the instantiation of a new variable.
  
  ## Terminator instructions
  
