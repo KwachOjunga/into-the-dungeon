@@ -2,7 +2,7 @@
   - [Hardware Patches](./book/articles/OnHardwarePatches.md)
 
 - [Shorts](./book/shorts.md)
-  - [On AI as a means](./book/shorts/guts.md)
+  - [AI as a means](./book/shorts/guts.md)
 
 - [Appendices](./book/appendices.md)
   - [Digital Logic](./book/appendices/digital.md)
