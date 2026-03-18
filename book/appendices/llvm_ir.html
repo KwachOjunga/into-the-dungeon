@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "ayu";
             const default_dark_theme = "ayu";
-            window.path_to_searchindex_js = "../../searchindex-9b39f799.js";
+            window.path_to_searchindex_js = "../../searchindex-04c3aeed.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-fddcf28f.js"></script>
@@ -182,12 +182,61 @@
 <ul>
 <li>Attributes</li>
 <li>linkages</li>
-<li>Terminator instrs</li>
+<li>Terminator instructions</li>
 <li>Metadata</li>
 <li>Debug Information</li>
-<li></li>
 </ul>
-<footer id="last-change">Last change: <time datetime="2026-03-17">2026-03-17</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/6d2dd6e">6d2dd6e</a></footer>
+<h3 id="terminator-instructions"><a class="header" href="#terminator-instructions">Terminator instructions</a></h3>
+<p>The terminator instructions are: ‘ret’, ‘br’, ‘switch’, ‘indirectbr’, ‘invoke’, ‘callbr’ ‘resume’, ‘catchswitch’, ‘catchret’, ‘cleanupret’, and ‘unreachable’.</p>
+<ul>
+<li>
+<p><code>ret</code>
+return a value from a function.</p>
+<p>_syntax</p>
+<pre><code class="language-text">  ret &lt;type&gt; &lt;value&gt;
+</code></pre>
+<p>_use-cases</p>
+<pre><code class="language-llvm-ir">  ret void
+  ret i64 %_0
+  ret i32 0
+  ret { i32, i8 } { i32 4, i8 2 } ; a struct with fields of i32 and i8
+</code></pre>
+<p>The return type must be of a first class type so basically it must be of the primitive types <code>i8</code>,<code>i32</code>,<code>i32</code>,<code>float</code> etc. If it is an aggregate type like a struct of some sort it must be delineated to illustrate the individual types within the aggregate type.</p>
+</li>
+<li>
+<p><code>br</code>
+branch conditionally or unconditionally from a block.</p>
+<p>_syntax</p>
+<pre><code class="language-text">  ;conditional branch
+  br i1 &lt;cond&gt;, label &lt;iftrue&gt;, label &lt;iffalse&gt;
+  
+  ; unconditional branch
+  br label %block
+</code></pre>
+<p>_use-cases</p>
+<pre><code class="language-llvm-ir">  br label %bb14
+  br i1 %_2, label %bb2, label %bb3
+</code></pre>
+</li>
+<li>
+<p><code>switch</code>
+_syntax</p>
+<pre><code class="language-text">  switch &lt;intty&gt; &lt;value&gt;, label &lt;defaultdest&gt; [ &lt;intty&gt; &lt;val&gt;, label &lt;dest&gt; ... ]
+</code></pre>
+<p>_use-cases</p>
+</li>
+</ul>
+<pre><code class="language-llvm-ir">switch i64 %_2, label %bb1 [
+    i64 0, label %bb5
+    i64 1, label %bb4
+    i64 2, label %bb3
+    i64 3, label %bb2
+  ]
+</code></pre>
+<p>From the langref :- “Depending on properties of the target machine and the particular switch instruction, this instruction may be code generated in different ways. For example, it could be generated as a series of chained conditional branches or with a lookup table.”</p>
+<h3 id="linkages"><a class="header" href="#linkages">Linkages</a></h3>
+<p>These appear to be information being passed to the linker.</p>
+<footer id="last-change">Last change: <time datetime="2026-03-18">2026-03-18</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/cb4007d">cb4007d</a></footer>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
