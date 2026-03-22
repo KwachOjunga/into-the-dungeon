@@ -1,4 +1,4 @@
- A set of llvm's internals illustrating their usages and syntax.
+An overview of some of llvm's internals illustrating their usages and syntax.
  
  Categories
  - Attributes
@@ -6,6 +6,8 @@
  - Terminator instructions
  - Metadata
  - Debug Information
+ 
+ For a complete reference of the IR, lookup [LLVM_IR](https://llvm.org/docs/LangRef.html)
  
  ## Examples
  
