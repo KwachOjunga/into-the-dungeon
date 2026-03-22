@@ -1,6 +1,10 @@
 ## Coder's fright 
 
 
+[DISCLAIMER] This is a pre-release version of an unsufficiently tested method that i am espousing. I will expound on it when its done.
+If you have variations of whatever i am trying to put across, feel free to launch a PR.
+
+
 ### Battling your inner demons
 
 You know, in all the programming lore that i have come across, none of them
