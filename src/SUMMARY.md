@@ -3,7 +3,6 @@
   - [Coder's fright](./book/articles/coderfright.md)
 
 - [Shorts](./book/shorts.md)
-  - [AI as a means](./book/shorts/guts.md)
 
 - [Appendices](./book/appendices.md)
   - [Digital Logic](./book/appendices/digital.md)
