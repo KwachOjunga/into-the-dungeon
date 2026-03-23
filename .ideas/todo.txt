@@ -3,3 +3,6 @@
 
 # 22/03/2026
 Write about channels and async. <This will not go away!!!>
+
+# 23/03/2026
+Zig for the Rustacean
