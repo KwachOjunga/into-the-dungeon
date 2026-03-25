@@ -15,7 +15,7 @@ An overview of some of llvm's internals illustrating their usages and syntax.
  necessarily need to be built for any language relying on its own custom IR.
  
  I do not think it can also be overstated how much utility it avails all in 
- a single codebase, especially the optimization passes and the verification 
+ a single codebase, especially the optimization  and verification 
  passes.
 
 So this effort goes to explore how various high level language constructs get to be lowered to  
@@ -47,6 +47,43 @@ the IR.
   }
  ```
  
+This is a purely subjective view.
+Static Single Assignment (SSA) is currently an approach  to help track definitions of variables and 
+separate the need to track various reassignments to the same variables.
+
+It's hard to exactly see the problem that this solves and why it lies at the core of the IR
+but a little examination quickly illustrates why it is useful.
+
+Compilers generally have to keep track of every variable used in an expression and 
+their respective definitions. This is important because it needs to get a proper picture
+of what exactly the program is doing in order to perform modifications without 
+altering the observed behavior of the program or what is visible in the execution environment.
+
+Basically all modifications no matter how radical ought to maintain the semantics of the program.
+
+*I find the fact that we managed to do this a very impressive feat.*
+
+So in order to generate efficient assembly or basically assembly that will simply not be highly improved 
+when hand written, multiple analyses have to be performed on the program at several levels.
+So the constrains put on the compiler writer are partly something they sign up to when designing the language 
+features. So if you are writing in a dynamic language where you can reassign variables however, the challenge
+is how to keep track of the changes in the variables in a way that maintains consistency as the variables are accessed and in use.
+This is effectively similar to repeatedly aiming and necessarily hitting a moving target.
+
+Now compiled languages or by and large systems languages and their compiler authors have 
+an added advantage in the following sense; if you are writing in a low level language, 
+the compiler writer has the oppportunity to expose some of the target architecture's complexity
+to the interface so that the programmer can get to handle whatever warts that come with it in a way.
+This also means that a programmer is given more control in such settings.
+But i deviate.
+
+The ssa imposes a constrain in that one can only assign once to a variable when defined.
+This touches upon the issue of use-def chains.
+
+But basically this eases the dataflow analyses that have to be performed on the program. By the way this
+constrain applies regardless of the scope in which the parts of prograom are being analyses.
+
+
  ```llvm-ir
     define i1 @greater_than(i32 %a, i32 %b) {
       start:
@@ -80,7 +117,9 @@ the IR.
         ret void        
     }
    ```
-  Actual rustc output with the added difference of printing the output to stdout
+  
+  
+  Actual rustc output. 
      
    ```llvm-ir
       ; great::main
