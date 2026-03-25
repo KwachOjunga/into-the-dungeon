@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "ayu";
             const default_dark_theme = "ayu";
-            window.path_to_searchindex_js = "../../searchindex-48b72125.js";
+            window.path_to_searchindex_js = "../../searchindex-dd09ae5a.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-91f001b0.js"></script>
@@ -192,7 +192,7 @@ you’ll know that compiler infrastructure fundamentally boils down to MLIR.
 And no wonder, it eliminates the need to design various code generators that
 necessarily need to be built for any language relying on its own custom IR.</p>
 <p>I do not think it can also be overstated how much utility it avails all in
-a single codebase, especially the optimization passes and the verification
+a single codebase, especially the optimization  and verification
 passes.</p>
 <p>So this effort goes to explore how various high level language constructs get to be lowered to<br>the IR.</p>
 <h2 id="examples"><a class="header" href="#examples">Examples</a></h2>
@@ -216,6 +216,33 @@ fn main() {
         b += 1
     }
 }</code></pre>
+<p>This is a purely subjective view.
+Static Single Assignment (SSA) is currently an approach  to help track definitions of variables and
+separate the need to track various reassignments to the same variables.</p>
+<p>It’s hard to exactly see the problem that this solves and why it lies at the core of the IR
+but a little examination quickly illustrates why it is useful.</p>
+<p>Compilers generally have to keep track of every variable used in an expression and
+their respective definitions. This is important because it needs to get a proper picture
+of what exactly the program is doing in order to perform modifications without
+altering the observed behavior of the program or what is visible in the execution environment.</p>
+<p>Basically all modifications no matter how radical ought to maintain the semantics of the program.</p>
+<p><em>I find the fact that we managed to do this a very impressive feat.</em></p>
+<p>So in order to generate efficient assembly or basically assembly that will simply not be highly improved
+when hand written, multiple analyses have to be performed on the program at several levels.
+So the constrains put on the compiler writer are partly something they sign up to when designing the language
+features. So if you are writing in a dynamic language where you can reassign variables however, the challenge
+is how to keep track of the changes in the variables in a way that maintains consistency as the variables are accessed and in use.
+This is effectively similar to repeatedly aiming and necessarily hitting a moving target.</p>
+<p>Now compiled languages or by and large systems languages and their compiler authors have
+an added advantage in the following sense; if you are writing in a low level language,
+the compiler writer has the oppportunity to expose some of the target architecture’s complexity
+to the interface so that the programmer can get to handle whatever warts that come with it in a way.
+This also means that a programmer is given more control in such settings.
+But i deviate.</p>
+<p>The ssa imposes a constrain in that one can only assign once to a variable when defined.
+This touches upon the issue of use-def chains.</p>
+<p>But basically this eases the dataflow analyses that have to be performed on the program. By the way this
+constrain applies regardless of the scope in which the parts of prograom are being analyses.</p>
 <pre><code class="language-llvm-ir">   define i1 @greater_than(i32 %a, i32 %b) {
      start:
        %cmp = icmp ugt i32 %a, i32 %b
@@ -248,7 +275,7 @@ fn main() {
        ret void        
    }
 </code></pre>
-<p>Actual rustc output with the added difference of printing the output to stdout</p>
+<p>Actual rustc output.</p>
 <pre><code class="language-llvm-ir">   ; great::main
    ; Function Attrs: nonlazybind uwtable
    define hidden void @_RNvCs3TUjdV8qTsL_5great4main() unnamed_addr #1 {
@@ -360,7 +387,7 @@ The return type must be of a first class type so basically it must be of the pri
 <p>From the langref :- “Depending on properties of the target machine and the particular switch instruction, this instruction may be code generated in different ways. For example, it could be generated as a series of chained conditional branches or with a lookup table.”</p>
 <h2 id="linkages"><a class="header" href="#linkages">Linkages</a></h2>
 <p>These appear to be information being passed to the linker.</p>
-<footer id="last-change">Last change: <time datetime="2026-03-23">2026-03-23</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/2553e18">2553e18</a></footer>
+<footer id="last-change">Last change: <time datetime="2026-03-25">2026-03-25</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/f57c640">f57c640</a></footer>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
