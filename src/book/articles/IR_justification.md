@@ -1,5 +1,7 @@
 I now find myself seeking justification for 
-pulling a massive dependency on the kisumu lang project.
+
+pulling a massive dependency into the kisumu lang project.
+
 This one is particularly intriguing since part of it actually 
 makes sense and the case for its requirement may be valid.
 
@@ -90,7 +92,9 @@ So, much of what has been made possible at the initial high level of expression 
 an outcome of this IR's capacity to capture what the user at a high level leaves unsaid.
 
 As a final illustration, its equivalent MIR(Mid-Level Intermediate Representation) is shown at the 
-bottom.
+bottom. It's structure is fairly similar to the HIR, but with more fine-grained details. It's also 
+closely related to the LLVM IR. - It captures the essence of lowering perfectly.
+
 
 Rust uses its HIR format for [type inference, trait solving and type checking](https://rustc-dev-guide.rust-lang.org/overview.html#ast-lowering).
 
