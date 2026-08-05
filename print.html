@@ -36,7 +36,7 @@
             const path_to_root = "";
             const default_light_theme = "ayu";
             const default_dark_theme = "ayu";
-            window.path_to_searchindex_js = "searchindex-e5f053fa.js";
+            window.path_to_searchindex_js = "searchindex-56303e9e.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-351494f3.js"></script>
@@ -190,7 +190,7 @@
 
 </div>
 
-<footer id="last-change">Last change: <time datetime="2026-08-06">2026-08-06</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/4bf6e45">4bf6e45</a></footer><div style="break-before: page; page-break-before: always;"></div>
+<footer id="last-change">Last change: <time datetime="2026-08-06">2026-08-06</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/dd1dce6">dd1dce6</a></footer><div style="break-before: page; page-break-before: always;"></div>
 <h1 id="on-hardware-patches"><a class="header" href="#on-hardware-patches">On Hardware Patches.</a></h1>
 <hr>
 <pre><code>                                                                            08/03/2026
@@ -221,7 +221,7 @@ it is accessing, the signals it is sending among a whole slew of other technique
 So the solutions come in three forms, all being updates/patches.
 In software, hardware and microcode.</p>
 <p>Yes, there is such a thing as microcode.</p>
-<footer id="last-change-1">Last change: <time datetime="2026-08-06">2026-08-06</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/4bf6e45">4bf6e45</a></footer>
+<footer id="last-change-1">Last change: <time datetime="2026-08-06">2026-08-06</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/dd1dce6">dd1dce6</a></footer>
 <hr>
 <ol class="footnote-definition">
 <li id="footnote-1">
@@ -290,7 +290,7 @@ of certain frequently accessed texts to be opened early enough to prevent severa
 <p>There is probably a trick about maintaining socket liveness to escape the handshake thing but anyway.
 Those who are serious enough switch to io-uring.</p>
 <p>I believe that it is in the pursuit of this kick that optimization engineers live.</p>
-<footer id="last-change-2">Last change: <time datetime="2026-08-06">2026-08-06</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/4bf6e45">4bf6e45</a></footer>
+<footer id="last-change-2">Last change: <time datetime="2026-08-06">2026-08-06</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/dd1dce6">dd1dce6</a></footer>
 <hr>
 <ol class="footnote-definition">
 <li id="footnote-1-1">
@@ -299,9 +299,9 @@ Those who are serious enough switch to io-uring.</p>
 </ol>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="the-case-for-an-ir"><a href="#the-case-for-an-ir" class="header">The case for an IR</a></h1>
-<p>I now find myself seeking justification for
-pulling a massive dependency on the kisumu lang project.
-This one is particularly intriguing since part of it actually
+<p>I now find myself seeking justification for</p>
+<p>pulling a massive dependency into the kisumu lang project.</p>
+<p>This one is particularly intriguing since part of it actually
 makes sense and the case for its requirement may be valid.</p>
 <p>Normally, the structure of a compiler’s pipeline is in the following stages:</p>
 <ul>
@@ -379,7 +379,8 @@ fn main() {
 So, much of what has been made possible at the initial high level of expression is largely
 an outcome of this IR’s capacity to capture what the user at a high level leaves unsaid.</p>
 <p>As a final illustration, its equivalent MIR(Mid-Level Intermediate Representation) is shown at the
-bottom.</p>
+bottom. It’s structure is fairly similar to the HIR, but with more fine-grained details. It’s also
+closely related to the LLVM IR. - It captures the essence of lowering perfectly.</p>
 <p>Rust uses its HIR format for <a href="https://rustc-dev-guide.rust-lang.org/overview.html#ast-lowering">type inference, trait solving and type checking</a>.</p>
 <p>Type inference is largely a feature to improve upon user experience.
 Trait solving serves mostly as bookkeeping over which traits are implemented for which types
@@ -632,7 +633,7 @@ fn main::{closure#0}(_1: &amp;mut {closure@char.rs:7:33: 7:36}, _2: u8) -&gt; u8
         return;
     }
 }</code></pre>
-<footer id="last-change-3">Last change: <time datetime="2026-08-06">2026-08-06</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/4bf6e45">4bf6e45</a></footer><div style="break-before: page; page-break-before: always;"></div>
+<footer id="last-change-3">Last change: <time datetime="2026-08-06">2026-08-06</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/dd1dce6">dd1dce6</a></footer><div style="break-before: page; page-break-before: always;"></div>
 <h1 id="shorts"><a class="header" href="#shorts">Shorts</a></h1>
 <hr>
 <p>A select section of random thoughts that do not exactly fit as articles.</p>
@@ -668,13 +669,13 @@ is left unexplored.</p>
 <p>So if we shift that focus to the field of computing we find equivalents of such characters in Joran Dirk Greef TigerBeetle’s founder
 and my personal favorites Chris Lattner, Jim Keller and Jordan Peterson.
 The other is Iain McGilchrist.</p>
-<footer id="last-change-4">Last change: <time datetime="2026-08-06">2026-08-06</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/4bf6e45">4bf6e45</a></footer><div style="break-before: page; page-break-before: always;"></div>
+<footer id="last-change-4">Last change: <time datetime="2026-08-06">2026-08-06</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/dd1dce6">dd1dce6</a></footer><div style="break-before: page; page-break-before: always;"></div>
 <h1 id="appendices"><a class="header" href="#appendices">Appendices</a></h1>
 <p>Some things you may find useful.</p>
 <ul>
 <li><a href="#llvm-ir">LLVM-IR reference overview. Instruction syntax and intrinsics.</a></li>
 </ul>
-<footer id="last-change-5">Last change: <time datetime="2026-08-06">2026-08-06</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/4bf6e45">4bf6e45</a></footer><div style="break-before: page; page-break-before: always;"></div>
+<footer id="last-change-5">Last change: <time datetime="2026-08-06">2026-08-06</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/dd1dce6">dd1dce6</a></footer><div style="break-before: page; page-break-before: always;"></div>
 <h1 id="digital-logic"><a href="#digital-logic" class="header">Digital Logic</a></h1>
 <h2 id="constructs-used-in-digital-circuit-optimization"><a class="header" href="#constructs-used-in-digital-circuit-optimization">Constructs used in digital circuit optimization</a></h2>
 <ul>
@@ -1831,7 +1832,7 @@ The other is Iain McGilchrist.</p>
 </svg>
 </div>
 
-<footer id="last-change-6">Last change: <time datetime="2026-08-06">2026-08-06</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/4bf6e45">4bf6e45</a></footer><div style="break-before: page; page-break-before: always;"></div>
+<footer id="last-change-6">Last change: <time datetime="2026-08-06">2026-08-06</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/dd1dce6">dd1dce6</a></footer><div style="break-before: page; page-break-before: always;"></div>
 <h1 id="core"><a class="header" href="#core">Core</a></h1>
 <ul>
 <li>Control Flow Graphs</li>
@@ -1848,7 +1849,7 @@ The other is Iain McGilchrist.</p>
 <li>Inlining</li>
 <li>Instruction scheduling</li>
 </ul>
-<footer id="last-change-7">Last change: <time datetime="2026-08-06">2026-08-06</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/4bf6e45">4bf6e45</a></footer><div style="break-before: page; page-break-before: always;"></div>
+<footer id="last-change-7">Last change: <time datetime="2026-08-06">2026-08-06</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/dd1dce6">dd1dce6</a></footer><div style="break-before: page; page-break-before: always;"></div>
 <h1 id="llvm-ir"><a href="#llvm-ir" class="header">LLVM-IR</a></h1>
 <p>An overview of some of llvm’s internals illustrating their usages and syntax.</p>
 <p>Categories</p>
@@ -2060,7 +2061,7 @@ The return type must be of a first class type so basically it must be of the pri
 <p>From the langref :- “Depending on properties of the target machine and the particular switch instruction, this instruction may be code generated in different ways. For example, it could be generated as a series of chained conditional branches or with a lookup table.”</p>
 <h2 id="linkages"><a class="header" href="#linkages">Linkages</a></h2>
 <p>These appear to be information being passed to the linker.</p>
-<footer id="last-change-8">Last change: <time datetime="2026-08-06">2026-08-06</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/4bf6e45">4bf6e45</a></footer>
+<footer id="last-change-8">Last change: <time datetime="2026-08-06">2026-08-06</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/dd1dce6">dd1dce6</a></footer>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">

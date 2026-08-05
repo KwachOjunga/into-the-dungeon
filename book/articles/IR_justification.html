@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "ayu";
             const default_dark_theme = "ayu";
-            window.path_to_searchindex_js = "../../searchindex-e5f053fa.js";
+            window.path_to_searchindex_js = "../../searchindex-56303e9e.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-351494f3.js"></script>
@@ -177,9 +177,9 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <p>I now find myself seeking justification for
-pulling a massive dependency on the kisumu lang project.
-This one is particularly intriguing since part of it actually
+                        <p>I now find myself seeking justification for</p>
+<p>pulling a massive dependency into the kisumu lang project.</p>
+<p>This one is particularly intriguing since part of it actually
 makes sense and the case for its requirement may be valid.</p>
 <p>Normally, the structure of a compiler’s pipeline is in the following stages:</p>
 <ul>
@@ -257,7 +257,8 @@ fn main() {
 So, much of what has been made possible at the initial high level of expression is largely
 an outcome of this IR’s capacity to capture what the user at a high level leaves unsaid.</p>
 <p>As a final illustration, its equivalent MIR(Mid-Level Intermediate Representation) is shown at the
-bottom.</p>
+bottom. It’s structure is fairly similar to the HIR, but with more fine-grained details. It’s also
+closely related to the LLVM IR. - It captures the essence of lowering perfectly.</p>
 <p>Rust uses its HIR format for <a href="https://rustc-dev-guide.rust-lang.org/overview.html#ast-lowering">type inference, trait solving and type checking</a>.</p>
 <p>Type inference is largely a feature to improve upon user experience.
 Trait solving serves mostly as bookkeeping over which traits are implemented for which types
@@ -510,7 +511,7 @@ fn main::{closure#0}(_1: &amp;mut {closure@char.rs:7:33: 7:36}, _2: u8) -&gt; u8
         return;
     }
 }</code></pre>
-<footer id="last-change">Last change: <time datetime="2026-08-06">2026-08-06</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/4bf6e45">4bf6e45</a></footer>
+<footer id="last-change">Last change: <time datetime="2026-08-06">2026-08-06</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/dd1dce6">dd1dce6</a></footer>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
