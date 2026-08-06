@@ -1,10 +1,10 @@
 A lot is going on currently in the world of hardware design.
-There is basically a whole world to be discivered in what 
+There is basically a whole world to be discovered in what 
 goes on into the design of processing units.
 
-to outsiders. High level synthesis tools that is.
 
 There is also all the work that goes into making the work accessible
+to outsiders. High level synthesis tools that is.
 
 Primary vehicles will be verilog and spade the language.
 
