@@ -35,10 +35,10 @@
             const path_to_root = "../../";
             const default_light_theme = "ayu";
             const default_dark_theme = "ayu";
-            window.path_to_searchindex_js = "../../searchindex-56303e9e.js";
+            window.path_to_searchindex_js = "../../searchindex-9dea6170.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-351494f3.js"></script>
+        <script src="../../toc-02661081.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -252,7 +252,8 @@ fn main() {
                     },
             };
         _t
-    }</code></pre>
+    }
+}</code></pre>
 <p>In this snippet, one can see how the compiler reconstructs the original source code to the HIR.
 So, much of what has been made possible at the initial high level of expression is largely
 an outcome of this IR’s capacity to capture what the user at a high level leaves unsaid.</p>
@@ -269,7 +270,12 @@ not forgetting the highly coveted need for memory safety.</p>
 architecture is that lowering the language’s AST to an IR prior to
 emitting the LLVM IR will be the most efficient way to support a class of language
 constructs without being bogged down by the needed research in implementation
-processes since the AST we will have by default will be custom to the language’s grammar.</p>
+processes since the AST we will have by default will be custom to the language’s grammar.
+Also, “syntax trees are high level; they depict the natural hierarchical structure of the
+source program and are well suited to tasks like static checking.”[1^]
+By the way, an IR doesn’t have to be something we have to print out in the same manner
+as Kisumu Lang currently does. It just have to bear the structure of the source code in
+a manner that allows the compiler to manipulate it as neccessary.</p>
 <p>If we lower it to a known IR format we can have reference points with which to compare
 against existing LLVM IR generators.</p>
 <p>But more specifically, i think lowering it to an IR like Pliron does a bunch for the entire ecosystem.</p>
@@ -511,7 +517,8 @@ fn main::{closure#0}(_1: &amp;mut {closure@char.rs:7:33: 7:36}, _2: u8) -&gt; u8
         return;
     }
 }</code></pre>
-<footer id="last-change">Last change: <time datetime="2026-08-06">2026-08-06</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/dd1dce6">dd1dce6</a></footer>
+<p>[1^]: Aho, Lam, Sethi - Dragon Book 2e. Ch6. Intermediate Code Generation.</p>
+<footer id="last-change">Last change: <time datetime="2026-08-07">2026-08-07</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/a8941ee">a8941ee</a></footer>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
