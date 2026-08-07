@@ -3,7 +3,7 @@
   - [Coder's fright](./book/articles/coderfright.md)
   - [The case for an IR](./book/articles/IR_justification.md)
 - [Shorts](./book/shorts.md)
-
+- [Ksm Lang](./book/articles/action_plan.md)
 - [Appendices](./book/appendices.md)
   - [Digital Logic](./book/appendices/digital.md)
   - [Compilers](./book/compiler.md)
