@@ -12,3 +12,18 @@ Topics that remain enshrouded and are largely domain knowledge.
     - Typesystems
     - Async
     - Processor Internals
+
+# 07/08/2026
+
+A benchmark illustrating the paper `Tail Latency meets Caching`.
+
+You are to maintain a several instances of a similar server process. Basically the
+different server instances that share common state or objects that
+need to be synchronized.
+
+Initiate several payloads that will be sent to the server instances in a
+unbalanced fashion.
+Basically the number of instances will vary by overloading certain instances with more payloads.
+
+Track the instances that are being overloaded and the number of payloads they are receiving
+and adjust the caches assgned accordingly.
