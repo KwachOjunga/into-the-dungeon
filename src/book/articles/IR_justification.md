@@ -1,5 +1,4 @@
 I now find myself seeking justification for 
-
 pulling a massive dependency into the kisumu lang project.
 
 This one is particularly intriguing since part of it actually 
@@ -111,7 +110,7 @@ emitting the LLVM IR will be the most efficient way to support a class of langua
 constructs without being bogged down by the needed research in implementation
 processes since the AST we will have by default will be custom to the language's grammar.
 Also, "syntax trees are high level; they depict the natural hierarchical structure of the
-source program and are well suited to tasks like static checking."[1^]
+source program and are well suited to tasks like static checking."[^1]
 By the way, an IR doesn't have to be something we have to print out in the same manner 
 as Kisumu Lang currently does. It just have to bear the structure of the source code in 
 a manner that allows the compiler to manipulate it as neccessary.
@@ -356,4 +355,4 @@ fn main::{closure#0}(_1: &mut {closure@char.rs:7:33: 7:36}, _2: u8) -> u8 {
 ```
 
 
-[1^]: Aho, Lam, Sethi - Dragon Book 2e. Ch6. Intermediate Code Generation.
+[^1]: Aho, Lam, Sethi - Dragon Book 2e. Ch6. Intermediate Code Generation.

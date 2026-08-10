@@ -1,0 +1,40 @@
+.figure-left {
+    float: left;
+    width: 45%;
+    margin: 0 2em 1em 0;
+}
+
+.figure-right {
+    float: right;
+    width: 45%;
+    margin: 0 0 1em 2em;
+}
+
+.figure-center {
+    display: block;
+    margin: 1.5em auto;
+    width: 80%;
+}
+
+.figure-left img,
+.figure-right img,
+.figure-center img,
+.figure-left svg,
+.figure-right svg,
+.figure-center svg {
+    width: 100%;
+    height: auto;
+}
+
+.clear {
+    clear: both;
+}
+
+@media (max-width: 700px) {
+    .figure-left,
+    .figure-right {
+        float: none;
+        width: 100%;
+        margin: 1em 0;
+    }
+}

@@ -2,6 +2,7 @@
   - [Hardware Patches](./book/articles/OnHardwarePatches.md)
   - [Coder's fright](./book/articles/coderfright.md)
   - [The case for an IR](./book/articles/IR_justification.md)
+- [Inside LLVM](./book/llvm/phase-1.md)
 - [Shorts](./book/shorts.md)
 - [Ksm Lang](./book/articles/action_plan.md)
 - [Appendices](./book/appendices.md)
