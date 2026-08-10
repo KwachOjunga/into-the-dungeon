@@ -248,3 +248,450 @@ constrain applies regardless of the scope in which the parts of prograom are bei
   ## Linkages 
   
   These appear to be information being passed to the linker.
+
+
+## Compiler Architecture with LLVM IR
+
+
+### Frontend Phase
+
+```mermaid
+flowchart TD
+
+    SOURCE["Source Program<br/><b>foo.c</b>"]
+
+    PREPROCESS["Preprocessing<br/><br/>
+    • #include expansion<br/>
+    • #define expansion<br/>
+    • Conditional compilation"]
+
+    SOURCE --> PREPROCESS
+
+    subgraph FRONTEND["FRONT-END — LANGUAGE DEPENDENT"]
+        direction TB
+
+        subgraph LEX["1. Lexical Analysis"]
+            direction TB
+
+            CHAR["Source Characters"]
+
+            SCANNER["Scanner / Lexer<br/><br/>
+            • Keywords<br/>
+            • Identifiers<br/>
+            • Literals<br/>
+            • Operators<br/>
+            • Punctuation"]
+
+            TOKENS["Token Stream"]
+
+            CHAR --> SCANNER --> TOKENS
+        end
+
+        subgraph PARSE["2. Syntax Analysis"]
+            direction TB
+
+            PARSER["Parser<br/><br/>
+            Grammar checking<br/>
+            Error recovery"]
+
+            CST["Concrete Syntax Tree"]
+
+            AST["Abstract Syntax Tree<br/><br/>
+            • Expressions<br/>
+            • Statements<br/>
+            • Declarations<br/>
+            • Functions"]
+
+            TOKENS --> PARSER --> CST --> AST
+        end
+
+        subgraph SEMANTIC["3. Semantic Analysis"]
+            direction TB
+
+            NAME["Name Resolution<br/><br/>
+            • Scope resolution<br/>
+            • Identifier binding"]
+
+            TYPE["Type Checking<br/><br/>
+            • Type compatibility<br/>
+            • Conversions<br/>
+            • Function signatures"]
+
+            SYMBOL["Symbol Table<br/><br/>
+            • Variables<br/>
+            • Functions<br/>
+            • Types<br/>
+            • Storage information"]
+
+            AST --> NAME
+            AST --> TYPE
+            AST --> SYMBOL
+        end
+
+        subgraph IRGEN["4. IR Generation"]
+            direction TB
+
+            LOWER["AST Lowering<br/><br/>
+            High-level constructs<br/>
+            → lower-level operations"]
+
+            CFG["Initial Control-Flow Graph<br/><br/>
+            • Basic blocks<br/>
+            • Branches<br/>
+            • Returns"]
+
+            IR["Intermediate Representation<br/><br/>
+            • Operations<br/>
+            • Loads / Stores<br/>
+            • Calls<br/>
+            • Branches"]
+
+            SSA["SSA Form<br/><br/>
+            • Single assignment<br/>
+            • Explicit data flow<br/>
+            • Φ nodes"]
+
+            LOWER --> CFG --> IR --> SSA
+        end
+
+        SCANNER --> PARSER
+        AST --> LOWER
+        NAME --> LOWER
+        TYPE --> LOWER
+        SYMBOL --> LOWER
+    end
+
+    PREPROCESS --> CHAR
+
+    SSA --> OUT["LLVM IR / SSA<br/><br/>
+    <b>Output of Front-End</b>"]
+
+    classDef source fill:#fff4cc,stroke:#c99400,stroke-width:2px;
+    classDef frontend fill:#e8f2fc,stroke:#3978b9,stroke-width:1.5px;
+    classDef boundary fill:#ffffff,stroke:#3978b9,stroke-width:2px,stroke-dasharray:5 4;
+
+    class SOURCE,PREPROCESS source;
+    class CHAR,SCANNER,TOKENS,PARSER,CST,AST frontend;
+    class NAME,TYPE,SYMBOL frontend;
+    class LOWER,CFG,IR,SSA frontend;
+    class OUT boundary;
+
+    style FRONTEND fill:#f7fbff,stroke:#3978b9,stroke-width:2px,stroke-dasharray:6 4
+    style LEX fill:#ffffff,stroke:#75a9d6
+    style PARSE fill:#ffffff,stroke:#75a9d6
+    style SEMANTIC fill:#ffffff,stroke:#75a9d6
+    style IRGEN fill:#ffffff,stroke:#75a9d6
+```
+
+### Middle-end Phase
+
+```mermaid
+flowchart TD
+
+    IN["LLVM IR / SSA<br/><br/>
+    <b>Input from Front-End</b>"]
+
+    subgraph MIDDLE["MIDDLE-END — MACHINE INDEPENDENT"]
+        direction TB
+
+        subgraph ANALYSIS["1. IR & Program Analysis"]
+            direction TB
+
+            CFG["Control-Flow Analysis<br/><br/>
+            • Basic blocks<br/>
+            • Dominators<br/>
+            • Dominance frontier<br/>
+            • Reachability"]
+
+            DATAFLOW["Data-Flow Analysis<br/><br/>
+            • Def-use chains<br/>
+            • Liveness<br/>
+            • Available expressions"]
+
+            ALIAS["Alias Analysis<br/><br/>
+            • Memory dependencies<br/>
+            • Pointer relationships"]
+
+            CALLGRAPH["Call-Graph Analysis<br/><br/>
+            • Callers / callees<br/>
+            • Recursion<br/>
+            • Inlining candidates"]
+
+            LOOP["Loop Analysis<br/><br/>
+            • Loop detection<br/>
+            • Nesting<br/>
+            • Induction variables"]
+
+        end
+
+        subgraph CANON["2. Canonicalization"]
+            direction TB
+
+            CFGSIMPLIFY["CFG Simplification<br/><br/>
+            • Remove unreachable blocks<br/>
+            • Merge blocks<br/>
+            • Simplify branches"]
+
+            INSTSIMPLIFY["Instruction Simplification<br/><br/>
+            • Normalize operations<br/>
+            • Simplify expressions<br/>
+            • Remove identities"]
+
+            SSACLEAN["SSA Simplification<br/><br/>
+            • Simplify Φ nodes<br/>
+            • Remove redundant values"]
+        end
+
+        subgraph SCALAR["3. Scalar Optimizations"]
+            direction TB
+
+            CF["Constant Folding"]
+            CP["Constant Propagation"]
+            CSE["Common Subexpression<br/>Elimination"]
+            DCE["Dead Code Elimination"]
+            COPY["Copy Propagation"]
+            GVN["Global Value Numbering"]
+            INSTCOMB["Instruction Combining"]
+
+            CF --> CP --> CSE --> DCE
+            CP --> COPY --> GVN --> INSTCOMB
+        end
+
+        subgraph MEMORY["4. Memory Optimizations"]
+            direction TB
+
+            M2R["Mem2Reg<br/><br/>
+            Memory → SSA registers"]
+
+            SROA["SROA<br/><br/>
+            Scalar Replacement<br/>
+            of Aggregates"]
+
+            LOAD["Load / Store Optimization"]
+
+            DSE["Dead Store Elimination"]
+
+            M2R --> SROA --> LOAD --> DSE
+        end
+
+        subgraph LOOP["5. Loop Optimizations"]
+            direction TB
+
+            LICM["LICM<br/><br/>
+            Loop-Invariant<br/>
+            Code Motion"]
+
+            ROTATE["Loop Rotation"]
+
+            UNROLL["Loop Unrolling"]
+
+            INDUCTION["Induction Variable<br/>Optimization"]
+
+            VECTOR["Loop Vectorization"]
+
+            LICM --> ROTATE --> UNROLL --> INDUCTION --> VECTOR
+        end
+
+        subgraph IPO["6. Interprocedural Optimization"]
+            direction TB
+
+            INLINE["Function Inlining"]
+
+            DEVIRT["Devirtualization"]
+
+            ARG["Argument / Return<br/>Propagation"]
+
+            GLOBAL["Global Optimization"]
+
+            INLINE --> DEVIRT --> ARG --> GLOBAL
+        end
+
+        subgraph PIPELINE["7. Optimization Pipeline"]
+            direction TB
+
+            PASSES["Pass Pipeline<br/><br/>
+            Analysis<br/>
+            ↓<br/>
+            Transformation<br/>
+            ↓<br/>
+            Analysis<br/>
+            ↓<br/>
+            Transformation"]
+
+            OPTIR["Optimized LLVM IR<br/><br/>
+            <b>Target-independent</b>"]
+
+            PASSES --> OPTIR
+        end
+
+        IN --> CFG
+        IN --> DATAFLOW
+        IN --> ALIAS
+        IN --> CALLGRAPH
+        IN --> LOOP
+
+        CFG --> CFGSIMPLIFY
+        DATAFLOW --> INSTSIMPLIFY
+        LOOP --> SSACLEAN
+
+        CFGSIMPLIFY --> PASSES
+        INSTSIMPLIFY --> PASSES
+        SSACLEAN --> PASSES
+
+        CSE --> PASSES
+        DCE --> PASSES
+        GVN --> PASSES
+        INSTCOMB --> PASSES
+
+        SROA --> PASSES
+        LOAD --> PASSES
+        DSE --> PASSES
+
+        VECTOR --> PASSES
+
+        GLOBAL --> PASSES
+    end
+
+    OPTIR --> OUT["Optimized LLVM IR<br/><br/>
+    <b>Output of Middle-End</b>"]
+
+    classDef boundary fill:#ffffff,stroke:#8148b5,stroke-width:2px,stroke-dasharray:5 4;
+    classDef middle fill:#f0e8fa,stroke:#8148b5,stroke-width:1.5px;
+
+    class IN,OUT boundary;
+    class CFG,DATAFLOW,ALIAS,CALLGRAPH,LOOP middle;
+    class CFGSIMPLIFY,INSTSIMPLIFY,SSACLEAN middle;
+    class CF,CP,CSE,DCE,COPY,GVN,INSTCOMB middle;
+    class M2R,SROA,LOAD,DSE middle;
+    class LICM,ROTATE,UNROLL,INDUCTION,VECTOR middle;
+    class INLINE,DEVIRT,ARG,GLOBAL middle;
+    class PASSES,OPTIR middle;
+
+    style MIDDLE fill:#fbf8ff,stroke:#8148b5,stroke-width:2px,stroke-dasharray:6 4
+    style ANALYSIS fill:#ffffff,stroke:#a779c9
+    style CANON fill:#ffffff,stroke:#a779c9
+    style SCALAR fill:#ffffff,stroke:#a779c9
+    style MEMORY fill:#ffffff,stroke:#a779c9
+    style LOOP fill:#ffffff,stroke:#a779c9
+    style IPO fill:#ffffff,stroke:#a779c9
+    style PIPELINE fill:#ffffff,stroke:#a779c9
+    
+```
+### Backend Phase
+
+```mermaid
+flowchart TD
+
+    IN["Optimized LLVM IR<br/><br/>
+    <b>Input from Middle-End</b>"]
+
+    subgraph BACKEND["BACK-END — TARGET DEPENDENT"]
+        direction TB
+
+        subgraph TARGET["1. Target Description"]
+            direction TB
+
+            ISA["Target ISA<br/><br/>
+            x86-64<br/>
+            AArch64<br/>
+            RISC-V<br/>
+            ..."]
+
+            REGS["Register File<br/><br/>
+            • General registers<br/>
+            • Vector registers<br/>
+            • Special registers"]
+
+            COST["Target Costs<br/><br/>
+            • Latency<br/>
+            • Throughput<br/>
+            • Register pressure"]
+
+            ABI["ABI / Calling Convention<br/><br/>
+            • Argument passing<br/>
+            • Return values<br/>
+            • Stack layout"]
+
+        end
+
+        subgraph LOWER["2. Target Lowering"]
+            direction TB
+
+            LEGALIZE["Legalization<br/><br/>
+            Convert unsupported<br/>
+            IR operations"]
+
+            TYPE["Type Legalization<br/><br/>
+            Adapt unsupported<br/>
+            data types"]
+
+            CALL["Calling Convention<br/>Lowering"]
+
+            CUSTOM["Target-Specific Lowering<br/><br/>
+            • Addressing modes<br/>
+            • Special instructions<br/>
+            • Intrinsics"]
+
+            LEGALIZE --> TYPE --> CUSTOM
+            ABI --> CALL
+        end
+
+        subgraph SELECT["3. Instruction Selection"]
+            direction TB
+
+            PATTERN["Instruction Pattern Matching<br/><br/>
+            Match IR operations<br/>
+            to target instructions"]
+
+            DAG["Selection DAG / GlobalISel<br/><br/>
+            Instruction dependencies"]
+
+            ISEL["Instruction Selection<br/><br/>
+            IR operations<br/>
+            → target operations"]
+
+            PSEUDO["Pseudo Instructions"]
+
+            DAG --> PATTERN --> ISEL --> PSEUDO
+        end
+
+        subgraph MIR["4. Machine IR"]
+            direction TB
+
+            MI["Machine Instructions"]
+
+            BLOCKS["Machine Basic Blocks"]
+
+            MF["Machine Function"]
+
+            MI --> BLOCKS --> MF
+        end
+
+        IN --> LEGALIZE
+
+        ISA --> LEGALIZE
+        REGS --> ISEL
+        COST --> ISEL
+
+        CUSTOM --> DAG
+        PSEUDO --> MI
+    end
+
+    MF --> OUT["Machine IR<br/><br/>
+    <b>Output of Instruction Selection</b>"]
+
+    classDef boundary fill:#ffffff,stroke:#58963c,stroke-width:2px,stroke-dasharray:5 4;
+    classDef backend fill:#e9f5e2,stroke:#58963c,stroke-width:1.5px;
+
+    class IN,OUT boundary;
+    class ISA,REGS,COST,ABI backend;
+    class LEGALIZE,TYPE,CALL,CUSTOM backend;
+    class PATTERN,DAG,ISEL,PSEUDO backend;
+    class MI,BLOCKS,MF backend;
+
+    style BACKEND fill:#f8fcf5,stroke:#58963c,stroke-width:2px,stroke-dasharray:6 4
+    style TARGET fill:#ffffff,stroke:#75ad5c
+    style LOWER fill:#ffffff,stroke:#75ad5c
+    style SELECT fill:#ffffff,stroke:#75ad5c
+    style MIR fill:#ffffff,stroke:#75ad5c
+  ```
