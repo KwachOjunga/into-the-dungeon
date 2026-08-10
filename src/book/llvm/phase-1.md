@@ -21,14 +21,17 @@ systems, and an ever-growing range of processor families.
 
 You get in the business of supporting infrastructure.
 
-The problem is no longer writing a **compiler**. The problem is maintaining **an ecosystem of compilers** 
+At this point, the problem is no longer writing a **compiler**. The problem is maintaining **an ecosystem of compilers** 
 that all need the same optimizations, the same bug fixes, and the same engineering improvements.
 
-**How can one compiler infrastructure support dozens of programming languages and dozens of processor architectures? 
-How does it tame such complexity?**
+**Is it possible to have a compiler infrastructure that supports dozens of programming languages and dozens of processor architectures? 
+How will it tame such complexity?**
 
 
-Before we examine any data structure, optimization pass, or backend interface, we must understand the engineering problem that forced LLVM into existence. Modern LLVM is best understood as a response to a scaling problem that traditional compiler architectures could not solve.
+Before we examine any data structure, optimization pass, or backend interface, it makes sense to understand the engineering
+problem that forced LLVM into existence. 
+Modern LLVM is best understood as a response to a scaling problem that
+traditional compiler architectures could not solve.
 
 ---
 
@@ -36,7 +39,8 @@ Before we examine any data structure, optimization pass, or backend interface, w
 
 A traditional compiler is often presented as a simple linear pipeline.
 
-For a compiler supporting one language and one architecture, this design works remarkably well. Every phase is built specifically for that single combination, allowing the implementation to be tightly integrated.
+For a compiler supporting one language and one architecture, this design works remarkably well. Every phase
+is built specifically for that single combination, allowing the implementation to be tightly integrated.
 The difficulties begin when either side of the pipeline grows.
 Suppose we wish to support five programming languages targeting three processor architectures.
 
@@ -48,14 +52,13 @@ Languages
 |---C++                        
 |---Rust               x86       ARM      RISC-V
 |---Swift                |________|_________|
-|---Zig          
-             
+|---Zig              
 
 5 Languages × 3 Architectures = 15 compiler combinations
 ```
 
 Without a shared infrastructure, every combination requires its own compilation pipeline.
-s more languages and architectures are added, the amount of duplicated engineering effort 
+If more languages and architectures are added, the amount of duplicated engineering effort 
 grows rapidly.
 
 This phenomenon is commonly known as the **N × M problem**.
@@ -74,15 +77,18 @@ forms, each evolving independently, each accumulating its own bugs and maintenan
 The traditional architecture therefore suffered from two fundamental scaling problems:
 
 1. **The N × M problem** — every new frontend or backend increases the number of compiler combinations that must be maintained.
-2. **The non-reusable middle** — the most sophisticated and valuable parts of a compiler, namely its analyses and optimizations, could not easily be shared across languages or architectures.
+2. **A non-reusable middle** — the most sophisticated and valuable parts of a compiler, namely its analyses and optimizations, could not easily be shared across languages or architectures.
 
-As software development expanded beyond a handful of languages and processor families, these problems became increasingly expensive. The challenge was no longer writing compilers—it was preventing compiler engineering effort from growing exponentially.
+As software development expanded beyond a handful of languages and processor families,
+these problems became increasingly expensive. The challenge was no longer writing compilers
+— it was preventing compiler engineering effort from growing exponentially.
 
 ---
 
 ## 3. The New Abstraction
 
-LLVM's most significant innovation was **not** LLVM IR.
+While LLVM IR is a critical component of the infrastructure, I would argue that
+LLVM's most significant innovation was **not** the IR[^1].
 
 Its most significant innovation was architectural.
 
@@ -266,9 +272,9 @@ In Part 2, we will examine why abstract syntax trees are insufficient, why raw a
 
 ---
 
-## Design Principle #1 — Isolate Variation
+## Design Principle #1 — Isolate variations
 
-> **When different parts of a system evolve for different reasons, separate them behind a stable interface.**
+> **When different parts of a system evolve for different reasons, separate them behind a stable interface.**[^2]
 >
 > Programming languages and processor architectures evolve independently. LLVM's first architectural decision was to isolate those two axes of change so that new languages and new targets could reuse the same optimization and code-generation infrastructure. Every major abstraction introduced later in LLVM is an extension of this same principle.
 
@@ -279,3 +285,7 @@ In Part 2, we will examine why abstract syntax trees are insufficient, why raw a
 > **Every abstraction in LLVM exists because the previous one could not adequately contain a particular form of complexity.**
 >
 > The traditional monolithic compiler could not solve the **N × M scaling problem**. LLVM's first abstraction—treating the compiler as a collection of reusable libraries—was introduced to solve exactly that problem. Every subsequent layer in the series will reveal another engineering challenge, another abstraction, and another carefully chosen boundary.
+
+
+[^1]: Joran Dirk Greef [may disagree with me on this](https://www.youtube.com/watch?v=yKgfk8lTQuE&t=2793s&pp=ygUZdGhlIHBvd2VyIG9mIGFuIGludGVyZmFjZQ%3D%3D).
+[^2]: One thing that is observable in hardware/sotware interface, any time one encounters a relatively radical idea, chances are a new functional unit is involved.
