@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en" class="ayu sidebar-visible" dir="ltr">
+<html lang="en" class="rust sidebar-visible" dir="ltr">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
@@ -34,12 +34,12 @@
         <!-- Provide site root and default themes to javascript -->
         <script>
             const path_to_root = "";
-            const default_light_theme = "ayu";
-            const default_dark_theme = "ayu";
-            window.path_to_searchindex_js = "searchindex-9dea6170.js";
+            const default_light_theme = "rust";
+            const default_dark_theme = "coal";
+            window.path_to_searchindex_js = "searchindex-cd605608.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-02661081.js"></script>
+        <script src="toc-a11913ed.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -77,7 +77,7 @@
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
-            html.classList.remove('ayu')
+            html.classList.remove('rust')
             html.classList.add(theme);
             html.classList.add("js");
         </script>
@@ -190,7 +190,7 @@
 
 </div>
 
-<footer id="last-change">Last change: <time datetime="2026-08-07">2026-08-07</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/a8941ee">a8941ee</a></footer><div style="break-before: page; page-break-before: always;"></div>
+<footer id="last-change">Last change: <time datetime="2026-08-10">2026-08-10</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/ecffde6">ecffde6</a></footer><div style="break-before: page; page-break-before: always;"></div>
 <h1 id="on-hardware-patches"><a class="header" href="#on-hardware-patches">On Hardware Patches.</a></h1>
 <hr>
 <pre><code>                                                                            08/03/2026
@@ -221,7 +221,7 @@ it is accessing, the signals it is sending among a whole slew of other technique
 So the solutions come in three forms, all being updates/patches.
 In software, hardware and microcode.</p>
 <p>Yes, there is such a thing as microcode.</p>
-<footer id="last-change-1">Last change: <time datetime="2026-08-07">2026-08-07</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/a8941ee">a8941ee</a></footer>
+<footer id="last-change-1">Last change: <time datetime="2026-08-10">2026-08-10</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/ecffde6">ecffde6</a></footer>
 <hr>
 <ol class="footnote-definition">
 <li id="footnote-1">
@@ -290,7 +290,7 @@ of certain frequently accessed texts to be opened early enough to prevent severa
 <p>There is probably a trick about maintaining socket liveness to escape the handshake thing but anyway.
 Those who are serious enough switch to io-uring.</p>
 <p>I believe that it is in the pursuit of this kick that optimization engineers live.</p>
-<footer id="last-change-2">Last change: <time datetime="2026-08-07">2026-08-07</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/a8941ee">a8941ee</a></footer>
+<footer id="last-change-2">Last change: <time datetime="2026-08-10">2026-08-10</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/ecffde6">ecffde6</a></footer>
 <hr>
 <ol class="footnote-definition">
 <li id="footnote-1-1">
@@ -299,8 +299,8 @@ Those who are serious enough switch to io-uring.</p>
 </ol>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="the-case-for-an-ir"><a href="#the-case-for-an-ir" class="header">The case for an IR</a></h1>
-<p>I now find myself seeking justification for</p>
-<p>pulling a massive dependency into the kisumu lang project.</p>
+<p>I now find myself seeking justification for
+pulling a massive dependency into the kisumu lang project.</p>
 <p>This one is particularly intriguing since part of it actually
 makes sense and the case for its requirement may be valid.</p>
 <p>Normally, the structure of a compiler’s pipeline is in the following stages:</p>
@@ -394,7 +394,7 @@ emitting the LLVM IR will be the most efficient way to support a class of langua
 constructs without being bogged down by the needed research in implementation
 processes since the AST we will have by default will be custom to the language’s grammar.
 Also, “syntax trees are high level; they depict the natural hierarchical structure of the
-source program and are well suited to tasks like static checking.”[1^]
+source program and are well suited to tasks like static checking.”<sup class="footnote-reference" id="fr-1-1-2"><a href="#footnote-1-2">1</a></sup>
 By the way, an IR doesn’t have to be something we have to print out in the same manner
 as Kisumu Lang currently does. It just have to bear the structure of the source code in
 a manner that allows the compiler to manipulate it as neccessary.</p>
@@ -639,8 +639,205 @@ fn main::{closure#0}(_1: &amp;mut {closure@char.rs:7:33: 7:36}, _2: u8) -&gt; u8
         return;
     }
 }</code></pre>
-<p>[1^]: Aho, Lam, Sethi - Dragon Book 2e. Ch6. Intermediate Code Generation.</p>
-<footer id="last-change-3">Last change: <time datetime="2026-08-07">2026-08-07</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/a8941ee">a8941ee</a></footer><div style="break-before: page; page-break-before: always;"></div>
+<footer id="last-change-3">Last change: <time datetime="2026-08-10">2026-08-10</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/ecffde6">ecffde6</a></footer>
+<hr>
+<ol class="footnote-definition">
+<li id="footnote-1-2">
+<p>Aho, Lam, Sethi - Dragon Book 2e. Ch6. Intermediate Code Generation. <a href="#fr-1-1-2">↩</a></p>
+</li>
+</ol>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="inside-llvm-engineering-a-target-independent-compiler"><a class="header" href="#inside-llvm-engineering-a-target-independent-compiler"><strong>Inside LLVM: Engineering a Target-Independent Compiler</strong></a></h1>
+<h2 id="why-llvm-exists"><a class="header" href="#why-llvm-exists"><strong>Why LLVM Exists</strong></a></h2>
+<h3 id="from-many-compilers-to-one-infrastructure"><a class="header" href="#from-many-compilers-to-one-infrastructure"><strong>From Many Compilers to One Infrastructure</strong></a></h3>
+<hr>
+<h2 id="1-the-question"><a class="header" href="#1-the-question">1. The Question</a></h2>
+<p>Imagine it is the late 1990s. You form part of a team that has built a successful compiler for a
+single programming language targeting a single processor architecture. The system is well
+understood, the optimizer is producing good code, and the backend reliably emits binaries
+for your target machine.</p>
+<p>Then the requirements change.</p>
+<p>A second programming language needs to be supported. Soon after, a new processor architecture becomes
+commercially important. Before long, customers expect support for multiple languages, multiple operating
+systems, and an ever-growing range of processor families.</p>
+<p>You get in the business of supporting infrastructure.</p>
+<p>The problem is no longer writing a <strong>compiler</strong>. The problem is maintaining <strong>an ecosystem of compilers</strong>
+that all need the same optimizations, the same bug fixes, and the same engineering improvements.</p>
+<p><strong>How can one compiler infrastructure support dozens of programming languages and dozens of processor architectures?
+How does it tame such complexity?</strong></p>
+<p>Before we examine any data structure, optimization pass, or backend interface, we must understand the engineering problem that forced LLVM into existence. Modern LLVM is best understood as a response to a scaling problem that traditional compiler architectures could not solve.</p>
+<hr>
+<h2 id="2-the-limitation"><a class="header" href="#2-the-limitation">2. The Limitation</a></h2>
+<p>A traditional compiler is often presented as a simple linear pipeline.</p>
+<p>For a compiler supporting one language and one architecture, this design works remarkably well. Every phase is built specifically for that single combination, allowing the implementation to be tightly integrated.
+The difficulties begin when either side of the pipeline grows.
+Suppose we wish to support five programming languages targeting three processor architectures.</p>
+<pre><code class="language-text">                
+Languages                  
+|---C                         Targets
+|---C++                        
+|---Rust               x86       ARM      RISC-V
+|---Swift                |________|_________|
+|---Zig          
+             
+
+5 Languages × 3 Architectures = 15 compiler combinations
+</code></pre>
+<p>Without a shared infrastructure, every combination requires its own compilation pipeline.
+s more languages and architectures are added, the amount of duplicated engineering effort
+grows rapidly.</p>
+<p>This phenomenon is commonly known as the <strong>N × M problem</strong>.</p>
+<p>The difficulty extends far beyond parsing source code or generating machine instructions.
+Every compiler benefits from sophisticated analyses and optimizations: dead code elimination,
+loop optimizations, common subexpression elimination, function inlining, register allocation,
+instruction scheduling, and many others.</p>
+<p>In a traditional architecture, improvements to these algorithms often had to be implemented repeatedly
+across multiple compiler implementations. The same optimization might exist in several slightly different
+forms, each evolving independently, each accumulating its own bugs and maintenance costs.</p>
+<p>The traditional architecture therefore suffered from two fundamental scaling problems:</p>
+<ol>
+<li><strong>The N × M problem</strong> — every new frontend or backend increases the number of compiler combinations that must be maintained.</li>
+<li><strong>The non-reusable middle</strong> — the most sophisticated and valuable parts of a compiler, namely its analyses and optimizations, could not easily be shared across languages or architectures.</li>
+</ol>
+<p>As software development expanded beyond a handful of languages and processor families, these problems became increasingly expensive. The challenge was no longer writing compilers—it was preventing compiler engineering effort from growing exponentially.</p>
+<hr>
+<h2 id="3-the-new-abstraction"><a class="header" href="#3-the-new-abstraction">3. The New Abstraction</a></h2>
+<p>LLVM’s most significant innovation was <strong>not</strong> LLVM IR.</p>
+<p>Its most significant innovation was architectural.</p>
+<p>Rather than treating a compiler as a single executable that performs every stage internally, LLVM treats a compiler as <strong>a collection of reusable libraries</strong>.</p>
+<p>The resulting architecture appears deceptively simple:</p>
+<pre class="mermaid">flowchart TD
+    A["Source Language"]
+    B["Frontend&lt;br/&gt;&lt;br/&gt;Clang · Rust · Swift · Zig · ..."]
+    C["LLVM IR"]
+    D["Middle-End Optimizer"]
+    E["Backend"]
+    F["Machine Code"]
+
+    A --&gt; B
+    B --&gt; C
+    C --&gt; D
+    D --&gt; E
+    E --&gt; F
+
+    classDef source fill:#fff4cc,stroke:#c99400,stroke-width:2px,color:#222;
+    classDef frontend fill:#e8f2fc,stroke:#3978b9,stroke-width:2px,color:#222;
+    classDef ir fill:#f0e8fa,stroke:#8148b5,stroke-width:2px,color:#222;
+    classDef optimizer fill:#f0e8fa,stroke:#8148b5,stroke-width:2px,color:#222;
+    classDef backend fill:#e9f5e2,stroke:#58963c,stroke-width:2px,color:#222;
+    classDef machine fill:#fff4cc,stroke:#c99400,stroke-width:2px,color:#222;
+
+    class A source;
+    class B frontend;
+    class C ir;
+    class D optimizer;
+    class E backend;
+    class F machine;
+</pre>
+
+<p>The frontend becomes responsible for understanding a programming language and translating it into LLVM IR.
+The middle-end performs analyses and optimizations without needing to know which language produced the IR.
+The backend translates that optimized IR into machine code for a specific processor architecture.</p>
+<p>A new language no longer needs to build its own optimizer.
+A new processor architecture no longer needs to implement an entire compiler.
+Instead, both become clients of a common infrastructure.</p>
+<p>It is important to understand what LLVM <strong>does not</strong> solve.</p>
+<p>LLVM does not eliminate the complexity of supporting multiple languages or multiple architectures.
+A frontend must still understand the syntax and semantics of its source language, and every backend
+must still understand the instruction set, calling conventions, and ABI of its target processor.</p>
+<p>What LLVM eliminates is the repeated implementation of everything that lies between those two ends.</p>
+<p>The optimizer, analyses, large portions of the code-generation pipeline, and numerous supporting libraries become shared infrastructure rather than duplicated engineering effort.</p>
+<p>This is the first and most fundamental abstraction in LLVM:</p>
+<blockquote>
+<p><strong>The compiler is no longer a monolithic program. It is a collection of reusable components connected through carefully designed interfaces.</strong></p>
+</blockquote>
+<hr>
+<h2 id="4-how-it-works"><a class="header" href="#4-how-it-works">4. How It Works</a></h2>
+<p>LLVM’s architecture is reflected directly in the structure of the project itself.</p>
+<p>At the top level of the repository are independent components rather than a single “compiler” directory.</p>
+<ul>
+<li><code>llvm/</code> — the reusable core libraries, including LLVM IR, analyses, transformations, code generation, target descriptions,</li>
+<li>the MC layer, and TableGen.</li>
+<li><code>clang/</code> — one frontend among many.</li>
+<li><code>lld/</code> — the linker.</li>
+<li><code>compiler-rt/</code> — runtime support libraries required by generated programs.</li>
+<li><code>libcxx/</code>, <code>libcxxabi/</code>, and related projects — the C++ standard library implementation and supporting runtime components.</li>
+</ul>
+<p>This organization reflects LLVM’s philosophy.
+The optimizer is not owned by Clang.
+The backend is not owned by Clang.
+The IR is not owned by Clang.
+Instead, Clang is itself a client of LLVM’s libraries, just as a JIT compiler, a static compiler, a binary translator,
+or a research tool can be.</p>
+<p>The pipeline shown earlier therefore represents more than compilation stages.</p>
+<p>Each boundary represents a <strong>library interface</strong> designed to isolate one class of variation from another.</p>
+<hr>
+<h2 id="5-why-these-boundaries-exist"><a class="header" href="#5-why-these-boundaries-exist">5. Why These Boundaries Exist</a></h2>
+<p>A recurring theme throughout this series is that LLVM introduces a new abstraction only when an existing one can no longer contain complexity.</p>
+<p>Programming languages evolve independently from processor architectures.</p>
+<p>A language designer may introduce new type systems, ownership models, generics, or concurrency features without changing anything about modern CPUs.</p>
+<p>Likewise, processor architects continue to develop wider vector units, new instruction sets, and increasingly sophisticated microarchitectures without any knowledge of Rust, Swift, or C++.</p>
+<p>LLVM deliberately separates these two axes of variation.</p>
+<p>The boundary between the frontend and the optimizer isolates language-specific complexity.</p>
+<p>The boundary between the optimizer and the backend isolates hardware-specific complexity.</p>
+<p>Rather than allowing these differences to permeate the entire compiler, LLVM confines each category of variation behind a dedicated interface.</p>
+<p>Every major abstraction introduced later in this series follows exactly the same design philosophy.</p>
+<hr>
+<h2 id="6-design-trade-offs"><a class="header" href="#6-design-trade-offs">6. Design Trade-offs</a></h2>
+<p>Library boundaries are not free.</p>
+<p>Every reusable interface must be expressive enough to satisfy many clients without becoming so general that meaningful optimization becomes impossible.</p>
+<p>LLVM IR must simultaneously support Clang, Rust, Swift, Julia, Zig, and many other frontends while remaining suitable for aggressive optimization.</p>
+<p>Likewise, backend interfaces must describe processors ranging from small embedded microcontrollers to large server CPUs and GPUs.</p>
+<p>Designing these interfaces therefore becomes an exercise in balance.</p>
+<p>Interfaces that are too narrow cannot accommodate new languages or architectures.</p>
+<p>Interfaces that are too broad lose precision and become increasingly difficult to optimize effectively.</p>
+<p>Much of LLVM’s evolution can be understood as the continuous refinement of these interfaces.</p>
+<p>The project deliberately accepts additional compile-time complexity and larger libraries in exchange for dramatically lower long-term engineering cost and substantially greater code reuse.</p>
+<hr>
+<h2 id="7-the-abstraction-leaks"><a class="header" href="#7-the-abstraction-leaks">7. The Abstraction Leaks</a></h2>
+<p>Even at this highest level the abstraction is imperfect.</p>
+<p>Target independence is an objective rather than an absolute guarantee.</p>
+<p>Certain information about the target machine must already be available while LLVM IR is being generated. Calling conventions, data layouts, pointer sizes, address spaces, and other architectural properties influence the correctness of generated programs.</p>
+<p>Consequently, LLVM provides carefully controlled mechanisms through which target-specific knowledge flows into otherwise target-independent components.</p>
+<p>These leaks are not failures of the design.</p>
+<p>They are examples of a recurring engineering principle that appears throughout LLVM:</p>
+<blockquote>
+<p><strong>Good abstractions isolate complexity; they do not pretend that complexity no longer exists.</strong></p>
+</blockquote>
+<hr>
+<h2 id="8-source-tour"><a class="header" href="#8-source-tour">8. Source Tour</a></h2>
+<p>The top-level structure of the LLVM project already reveals its architectural philosophy.</p>
+<ul>
+<li><code>llvm/</code> — reusable compiler infrastructure.</li>
+<li><code>clang/</code> — one frontend built on that infrastructure.</li>
+<li><code>lld/</code> — the linker.</li>
+<li><code>compiler-rt/</code> — runtime libraries.</li>
+<li><code>libcxx/</code> and related projects — standard library components.</li>
+</ul>
+<p>Notice what is absent.</p>
+<p>There is no directory that simply contains “the compiler.”</p>
+<p>Instead, there is a collection of interoperable components that can be assembled in different ways depending on the needs of the tool being built.</p>
+<hr>
+<h2 id="9-looking-ahead"><a class="header" href="#9-looking-ahead">9. Looking Ahead</a></h2>
+<p>We now understand <strong>why</strong> LLVM was organized as a collection of reusable libraries.</p>
+<p>That naturally leads to a deeper question.</p>
+<p>If dozens of programming languages are expected to share a single optimizer, <strong>what common language do they all speak?</strong></p>
+<p>The answer is <strong>LLVM IR</strong>.</p>
+<p>Far more than an intermediate representation, LLVM IR is the central contract around which the entire LLVM ecosystem is built. It is expressive enough to represent a wide variety of source languages, yet constrained enough to enable powerful, target-independent optimizations.</p>
+<p>In Part 2, we will examine why abstract syntax trees are insufficient, why raw assembly is insufficient, and how LLVM IR was engineered to occupy the narrow but crucial space between them.</p>
+<hr>
+<h2 id="design-principle-1--isolate-variation"><a class="header" href="#design-principle-1--isolate-variation">Design Principle #1 — Isolate Variation</a></h2>
+<blockquote>
+<p><strong>When different parts of a system evolve for different reasons, separate them behind a stable interface.</strong></p>
+<p>Programming languages and processor architectures evolve independently. LLVM’s first architectural decision was to isolate those two axes of change so that new languages and new targets could reuse the same optimization and code-generation infrastructure. Every major abstraction introduced later in LLVM is an extension of this same principle.</p>
+</blockquote>
+<hr>
+<h3 id="series-thread"><a class="header" href="#series-thread"><strong>Series Thread</strong></a></h3>
+<blockquote>
+<p><strong>Every abstraction in LLVM exists because the previous one could not adequately contain a particular form of complexity.</strong></p>
+<p>The traditional monolithic compiler could not solve the <strong>N × M scaling problem</strong>. LLVM’s first abstraction—treating the compiler as a collection of reusable libraries—was introduced to solve exactly that problem. Every subsequent layer in the series will reveal another engineering challenge, another abstraction, and another carefully chosen boundary.</p>
+</blockquote>
+<footer id="last-change-4">Last change: <time datetime="2026-08-10">2026-08-10</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/ecffde6">ecffde6</a></footer><div style="break-before: page; page-break-before: always;"></div>
 <h1 id="shorts"><a class="header" href="#shorts">Shorts</a></h1>
 <hr>
 <p>A select section of random thoughts that do not exactly fit as articles.</p>
@@ -676,7 +873,7 @@ is left unexplored.</p>
 <p>So if we shift that focus to the field of computing we find equivalents of such characters in Joran Dirk Greef TigerBeetle’s founder
 and my personal favorites Chris Lattner, Jim Keller and Jordan Peterson.
 The other is Iain McGilchrist.</p>
-<footer id="last-change-4">Last change: <time datetime="2026-08-07">2026-08-07</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/a8941ee">a8941ee</a></footer><div style="break-before: page; page-break-before: always;"></div>
+<footer id="last-change-5">Last change: <time datetime="2026-08-10">2026-08-10</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/ecffde6">ecffde6</a></footer><div style="break-before: page; page-break-before: always;"></div>
 <h1 id="kisumu-lang-roadmap"><a class="header" href="#kisumu-lang-roadmap">Kisumu Lang Roadmap</a></h1>
 <p>Kisumu Lang’s prmary objective is a scholarly one.
 It offers a place one can get to observe the internals of compiler design
@@ -733,13 +930,13 @@ develop tools across the entire semi-conductor tool plane.
 - Hardware DEscription Languages - this by extension means designing custom
 targets for AI workloads</p>
 <h1 id="relevant-things-to-consider"><a class="header" href="#relevant-things-to-consider">Relevant Things to Consider</a></h1>
-<footer id="last-change-5">Last change: <time datetime="2026-08-07">2026-08-07</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/a8941ee">a8941ee</a></footer><div style="break-before: page; page-break-before: always;"></div>
+<footer id="last-change-6">Last change: <time datetime="2026-08-10">2026-08-10</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/ecffde6">ecffde6</a></footer><div style="break-before: page; page-break-before: always;"></div>
 <h1 id="appendices"><a class="header" href="#appendices">Appendices</a></h1>
 <p>Some things you may find useful.</p>
 <ul>
 <li><a href="#llvm-ir">LLVM-IR reference overview. Instruction syntax and intrinsics.</a></li>
 </ul>
-<footer id="last-change-6">Last change: <time datetime="2026-08-07">2026-08-07</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/a8941ee">a8941ee</a></footer><div style="break-before: page; page-break-before: always;"></div>
+<footer id="last-change-7">Last change: <time datetime="2026-08-10">2026-08-10</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/ecffde6">ecffde6</a></footer><div style="break-before: page; page-break-before: always;"></div>
 <h1 id="digital-logic"><a href="#digital-logic" class="header">Digital Logic</a></h1>
 <h2 id="constructs-used-in-digital-circuit-optimization"><a class="header" href="#constructs-used-in-digital-circuit-optimization">Constructs used in digital circuit optimization</a></h2>
 <ul>
@@ -1896,7 +2093,7 @@ targets for AI workloads</p>
 </svg>
 </div>
 
-<footer id="last-change-7">Last change: <time datetime="2026-08-07">2026-08-07</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/a8941ee">a8941ee</a></footer><div style="break-before: page; page-break-before: always;"></div>
+<footer id="last-change-8">Last change: <time datetime="2026-08-10">2026-08-10</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/ecffde6">ecffde6</a></footer><div style="break-before: page; page-break-before: always;"></div>
 <h1 id="core"><a class="header" href="#core">Core</a></h1>
 <ul>
 <li>Control Flow Graphs</li>
@@ -1913,7 +2110,7 @@ targets for AI workloads</p>
 <li>Inlining</li>
 <li>Instruction scheduling</li>
 </ul>
-<footer id="last-change-8">Last change: <time datetime="2026-08-07">2026-08-07</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/a8941ee">a8941ee</a></footer><div style="break-before: page; page-break-before: always;"></div>
+<footer id="last-change-9">Last change: <time datetime="2026-08-10">2026-08-10</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/ecffde6">ecffde6</a></footer><div style="break-before: page; page-break-before: always;"></div>
 <h1 id="llvm-ir"><a href="#llvm-ir" class="header">LLVM-IR</a></h1>
 <p>An overview of some of llvm’s internals illustrating their usages and syntax.</p>
 <p>Categories</p>
@@ -2125,7 +2322,446 @@ The return type must be of a first class type so basically it must be of the pri
 <p>From the langref :- “Depending on properties of the target machine and the particular switch instruction, this instruction may be code generated in different ways. For example, it could be generated as a series of chained conditional branches or with a lookup table.”</p>
 <h2 id="linkages"><a class="header" href="#linkages">Linkages</a></h2>
 <p>These appear to be information being passed to the linker.</p>
-<footer id="last-change-9">Last change: <time datetime="2026-08-07">2026-08-07</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/a8941ee">a8941ee</a></footer>
+<h2 id="compiler-architecture-with-llvm-ir"><a class="header" href="#compiler-architecture-with-llvm-ir">Compiler Architecture with LLVM IR</a></h2>
+<h3 id="frontend-phase"><a class="header" href="#frontend-phase">Frontend Phase</a></h3>
+<pre class="mermaid">flowchart TD
+
+    SOURCE["Source Program&lt;br/&gt;&lt;b&gt;foo.c&lt;/b&gt;"]
+
+    PREPROCESS["Preprocessing&lt;br/&gt;&lt;br/&gt;
+    • #include expansion&lt;br/&gt;
+    • #define expansion&lt;br/&gt;
+    • Conditional compilation"]
+
+    SOURCE --&gt; PREPROCESS
+
+    subgraph FRONTEND["FRONT-END — LANGUAGE DEPENDENT"]
+        direction TB
+
+        subgraph LEX["1. Lexical Analysis"]
+            direction TB
+
+            CHAR["Source Characters"]
+
+            SCANNER["Scanner / Lexer&lt;br/&gt;&lt;br/&gt;
+            • Keywords&lt;br/&gt;
+            • Identifiers&lt;br/&gt;
+            • Literals&lt;br/&gt;
+            • Operators&lt;br/&gt;
+            • Punctuation"]
+
+            TOKENS["Token Stream"]
+
+            CHAR --&gt; SCANNER --&gt; TOKENS
+        end
+
+        subgraph PARSE["2. Syntax Analysis"]
+            direction TB
+
+            PARSER["Parser&lt;br/&gt;&lt;br/&gt;
+            Grammar checking&lt;br/&gt;
+            Error recovery"]
+
+            CST["Concrete Syntax Tree"]
+
+            AST["Abstract Syntax Tree&lt;br/&gt;&lt;br/&gt;
+            • Expressions&lt;br/&gt;
+            • Statements&lt;br/&gt;
+            • Declarations&lt;br/&gt;
+            • Functions"]
+
+            TOKENS --&gt; PARSER --&gt; CST --&gt; AST
+        end
+
+        subgraph SEMANTIC["3. Semantic Analysis"]
+            direction TB
+
+            NAME["Name Resolution&lt;br/&gt;&lt;br/&gt;
+            • Scope resolution&lt;br/&gt;
+            • Identifier binding"]
+
+            TYPE["Type Checking&lt;br/&gt;&lt;br/&gt;
+            • Type compatibility&lt;br/&gt;
+            • Conversions&lt;br/&gt;
+            • Function signatures"]
+
+            SYMBOL["Symbol Table&lt;br/&gt;&lt;br/&gt;
+            • Variables&lt;br/&gt;
+            • Functions&lt;br/&gt;
+            • Types&lt;br/&gt;
+            • Storage information"]
+
+            AST --&gt; NAME
+            AST --&gt; TYPE
+            AST --&gt; SYMBOL
+        end
+
+        subgraph IRGEN["4. IR Generation"]
+            direction TB
+
+            LOWER["AST Lowering&lt;br/&gt;&lt;br/&gt;
+            High-level constructs&lt;br/&gt;
+            → lower-level operations"]
+
+            CFG["Initial Control-Flow Graph&lt;br/&gt;&lt;br/&gt;
+            • Basic blocks&lt;br/&gt;
+            • Branches&lt;br/&gt;
+            • Returns"]
+
+            IR["Intermediate Representation&lt;br/&gt;&lt;br/&gt;
+            • Operations&lt;br/&gt;
+            • Loads / Stores&lt;br/&gt;
+            • Calls&lt;br/&gt;
+            • Branches"]
+
+            SSA["SSA Form&lt;br/&gt;&lt;br/&gt;
+            • Single assignment&lt;br/&gt;
+            • Explicit data flow&lt;br/&gt;
+            • Φ nodes"]
+
+            LOWER --&gt; CFG --&gt; IR --&gt; SSA
+        end
+
+        SCANNER --&gt; PARSER
+        AST --&gt; LOWER
+        NAME --&gt; LOWER
+        TYPE --&gt; LOWER
+        SYMBOL --&gt; LOWER
+    end
+
+    PREPROCESS --&gt; CHAR
+
+    SSA --&gt; OUT["LLVM IR / SSA&lt;br/&gt;&lt;br/&gt;
+    &lt;b&gt;Output of Front-End&lt;/b&gt;"]
+
+    classDef source fill:#fff4cc,stroke:#c99400,stroke-width:2px;
+    classDef frontend fill:#e8f2fc,stroke:#3978b9,stroke-width:1.5px;
+    classDef boundary fill:#ffffff,stroke:#3978b9,stroke-width:2px,stroke-dasharray:5 4;
+
+    class SOURCE,PREPROCESS source;
+    class CHAR,SCANNER,TOKENS,PARSER,CST,AST frontend;
+    class NAME,TYPE,SYMBOL frontend;
+    class LOWER,CFG,IR,SSA frontend;
+    class OUT boundary;
+
+    style FRONTEND fill:#f7fbff,stroke:#3978b9,stroke-width:2px,stroke-dasharray:6 4
+    style LEX fill:#ffffff,stroke:#75a9d6
+    style PARSE fill:#ffffff,stroke:#75a9d6
+    style SEMANTIC fill:#ffffff,stroke:#75a9d6
+    style IRGEN fill:#ffffff,stroke:#75a9d6
+</pre>
+
+<h3 id="middle-end-phase"><a class="header" href="#middle-end-phase">Middle-end Phase</a></h3>
+<pre class="mermaid">flowchart TD
+
+    IN["LLVM IR / SSA&lt;br/&gt;&lt;br/&gt;
+    &lt;b&gt;Input from Front-End&lt;/b&gt;"]
+
+    subgraph MIDDLE["MIDDLE-END — MACHINE INDEPENDENT"]
+        direction TB
+
+        subgraph ANALYSIS["1. IR &amp; Program Analysis"]
+            direction TB
+
+            CFG["Control-Flow Analysis&lt;br/&gt;&lt;br/&gt;
+            • Basic blocks&lt;br/&gt;
+            • Dominators&lt;br/&gt;
+            • Dominance frontier&lt;br/&gt;
+            • Reachability"]
+
+            DATAFLOW["Data-Flow Analysis&lt;br/&gt;&lt;br/&gt;
+            • Def-use chains&lt;br/&gt;
+            • Liveness&lt;br/&gt;
+            • Available expressions"]
+
+            ALIAS["Alias Analysis&lt;br/&gt;&lt;br/&gt;
+            • Memory dependencies&lt;br/&gt;
+            • Pointer relationships"]
+
+            CALLGRAPH["Call-Graph Analysis&lt;br/&gt;&lt;br/&gt;
+            • Callers / callees&lt;br/&gt;
+            • Recursion&lt;br/&gt;
+            • Inlining candidates"]
+
+            LOOP["Loop Analysis&lt;br/&gt;&lt;br/&gt;
+            • Loop detection&lt;br/&gt;
+            • Nesting&lt;br/&gt;
+            • Induction variables"]
+
+        end
+
+        subgraph CANON["2. Canonicalization"]
+            direction TB
+
+            CFGSIMPLIFY["CFG Simplification&lt;br/&gt;&lt;br/&gt;
+            • Remove unreachable blocks&lt;br/&gt;
+            • Merge blocks&lt;br/&gt;
+            • Simplify branches"]
+
+            INSTSIMPLIFY["Instruction Simplification&lt;br/&gt;&lt;br/&gt;
+            • Normalize operations&lt;br/&gt;
+            • Simplify expressions&lt;br/&gt;
+            • Remove identities"]
+
+            SSACLEAN["SSA Simplification&lt;br/&gt;&lt;br/&gt;
+            • Simplify Φ nodes&lt;br/&gt;
+            • Remove redundant values"]
+        end
+
+        subgraph SCALAR["3. Scalar Optimizations"]
+            direction TB
+
+            CF["Constant Folding"]
+            CP["Constant Propagation"]
+            CSE["Common Subexpression&lt;br/&gt;Elimination"]
+            DCE["Dead Code Elimination"]
+            COPY["Copy Propagation"]
+            GVN["Global Value Numbering"]
+            INSTCOMB["Instruction Combining"]
+
+            CF --&gt; CP --&gt; CSE --&gt; DCE
+            CP --&gt; COPY --&gt; GVN --&gt; INSTCOMB
+        end
+
+        subgraph MEMORY["4. Memory Optimizations"]
+            direction TB
+
+            M2R["Mem2Reg&lt;br/&gt;&lt;br/&gt;
+            Memory → SSA registers"]
+
+            SROA["SROA&lt;br/&gt;&lt;br/&gt;
+            Scalar Replacement&lt;br/&gt;
+            of Aggregates"]
+
+            LOAD["Load / Store Optimization"]
+
+            DSE["Dead Store Elimination"]
+
+            M2R --&gt; SROA --&gt; LOAD --&gt; DSE
+        end
+
+        subgraph LOOP["5. Loop Optimizations"]
+            direction TB
+
+            LICM["LICM&lt;br/&gt;&lt;br/&gt;
+            Loop-Invariant&lt;br/&gt;
+            Code Motion"]
+
+            ROTATE["Loop Rotation"]
+
+            UNROLL["Loop Unrolling"]
+
+            INDUCTION["Induction Variable&lt;br/&gt;Optimization"]
+
+            VECTOR["Loop Vectorization"]
+
+            LICM --&gt; ROTATE --&gt; UNROLL --&gt; INDUCTION --&gt; VECTOR
+        end
+
+        subgraph IPO["6. Interprocedural Optimization"]
+            direction TB
+
+            INLINE["Function Inlining"]
+
+            DEVIRT["Devirtualization"]
+
+            ARG["Argument / Return&lt;br/&gt;Propagation"]
+
+            GLOBAL["Global Optimization"]
+
+            INLINE --&gt; DEVIRT --&gt; ARG --&gt; GLOBAL
+        end
+
+        subgraph PIPELINE["7. Optimization Pipeline"]
+            direction TB
+
+            PASSES["Pass Pipeline&lt;br/&gt;&lt;br/&gt;
+            Analysis&lt;br/&gt;
+            ↓&lt;br/&gt;
+            Transformation&lt;br/&gt;
+            ↓&lt;br/&gt;
+            Analysis&lt;br/&gt;
+            ↓&lt;br/&gt;
+            Transformation"]
+
+            OPTIR["Optimized LLVM IR&lt;br/&gt;&lt;br/&gt;
+            &lt;b&gt;Target-independent&lt;/b&gt;"]
+
+            PASSES --&gt; OPTIR
+        end
+
+        IN --&gt; CFG
+        IN --&gt; DATAFLOW
+        IN --&gt; ALIAS
+        IN --&gt; CALLGRAPH
+        IN --&gt; LOOP
+
+        CFG --&gt; CFGSIMPLIFY
+        DATAFLOW --&gt; INSTSIMPLIFY
+        LOOP --&gt; SSACLEAN
+
+        CFGSIMPLIFY --&gt; PASSES
+        INSTSIMPLIFY --&gt; PASSES
+        SSACLEAN --&gt; PASSES
+
+        CSE --&gt; PASSES
+        DCE --&gt; PASSES
+        GVN --&gt; PASSES
+        INSTCOMB --&gt; PASSES
+
+        SROA --&gt; PASSES
+        LOAD --&gt; PASSES
+        DSE --&gt; PASSES
+
+        VECTOR --&gt; PASSES
+
+        GLOBAL --&gt; PASSES
+    end
+
+    OPTIR --&gt; OUT["Optimized LLVM IR&lt;br/&gt;&lt;br/&gt;
+    &lt;b&gt;Output of Middle-End&lt;/b&gt;"]
+
+    classDef boundary fill:#ffffff,stroke:#8148b5,stroke-width:2px,stroke-dasharray:5 4;
+    classDef middle fill:#f0e8fa,stroke:#8148b5,stroke-width:1.5px;
+
+    class IN,OUT boundary;
+    class CFG,DATAFLOW,ALIAS,CALLGRAPH,LOOP middle;
+    class CFGSIMPLIFY,INSTSIMPLIFY,SSACLEAN middle;
+    class CF,CP,CSE,DCE,COPY,GVN,INSTCOMB middle;
+    class M2R,SROA,LOAD,DSE middle;
+    class LICM,ROTATE,UNROLL,INDUCTION,VECTOR middle;
+    class INLINE,DEVIRT,ARG,GLOBAL middle;
+    class PASSES,OPTIR middle;
+
+    style MIDDLE fill:#fbf8ff,stroke:#8148b5,stroke-width:2px,stroke-dasharray:6 4
+    style ANALYSIS fill:#ffffff,stroke:#a779c9
+    style CANON fill:#ffffff,stroke:#a779c9
+    style SCALAR fill:#ffffff,stroke:#a779c9
+    style MEMORY fill:#ffffff,stroke:#a779c9
+    style LOOP fill:#ffffff,stroke:#a779c9
+    style IPO fill:#ffffff,stroke:#a779c9
+    style PIPELINE fill:#ffffff,stroke:#a779c9
+    
+</pre>
+
+<h3 id="backend-phase"><a class="header" href="#backend-phase">Backend Phase</a></h3>
+<pre class="mermaid">flowchart TD
+
+    IN["Optimized LLVM IR&lt;br/&gt;&lt;br/&gt;
+    &lt;b&gt;Input from Middle-End&lt;/b&gt;"]
+
+    subgraph BACKEND["BACK-END — TARGET DEPENDENT"]
+        direction TB
+
+        subgraph TARGET["1. Target Description"]
+            direction TB
+
+            ISA["Target ISA&lt;br/&gt;&lt;br/&gt;
+            x86-64&lt;br/&gt;
+            AArch64&lt;br/&gt;
+            RISC-V&lt;br/&gt;
+            ..."]
+
+            REGS["Register File&lt;br/&gt;&lt;br/&gt;
+            • General registers&lt;br/&gt;
+            • Vector registers&lt;br/&gt;
+            • Special registers"]
+
+            COST["Target Costs&lt;br/&gt;&lt;br/&gt;
+            • Latency&lt;br/&gt;
+            • Throughput&lt;br/&gt;
+            • Register pressure"]
+
+            ABI["ABI / Calling Convention&lt;br/&gt;&lt;br/&gt;
+            • Argument passing&lt;br/&gt;
+            • Return values&lt;br/&gt;
+            • Stack layout"]
+
+        end
+
+        subgraph LOWER["2. Target Lowering"]
+            direction TB
+
+            LEGALIZE["Legalization&lt;br/&gt;&lt;br/&gt;
+            Convert unsupported&lt;br/&gt;
+            IR operations"]
+
+            TYPE["Type Legalization&lt;br/&gt;&lt;br/&gt;
+            Adapt unsupported&lt;br/&gt;
+            data types"]
+
+            CALL["Calling Convention&lt;br/&gt;Lowering"]
+
+            CUSTOM["Target-Specific Lowering&lt;br/&gt;&lt;br/&gt;
+            • Addressing modes&lt;br/&gt;
+            • Special instructions&lt;br/&gt;
+            • Intrinsics"]
+
+            LEGALIZE --&gt; TYPE --&gt; CUSTOM
+            ABI --&gt; CALL
+        end
+
+        subgraph SELECT["3. Instruction Selection"]
+            direction TB
+
+            PATTERN["Instruction Pattern Matching&lt;br/&gt;&lt;br/&gt;
+            Match IR operations&lt;br/&gt;
+            to target instructions"]
+
+            DAG["Selection DAG / GlobalISel&lt;br/&gt;&lt;br/&gt;
+            Instruction dependencies"]
+
+            ISEL["Instruction Selection&lt;br/&gt;&lt;br/&gt;
+            IR operations&lt;br/&gt;
+            → target operations"]
+
+            PSEUDO["Pseudo Instructions"]
+
+            DAG --&gt; PATTERN --&gt; ISEL --&gt; PSEUDO
+        end
+
+        subgraph MIR["4. Machine IR"]
+            direction TB
+
+            MI["Machine Instructions"]
+
+            BLOCKS["Machine Basic Blocks"]
+
+            MF["Machine Function"]
+
+            MI --&gt; BLOCKS --&gt; MF
+        end
+
+        IN --&gt; LEGALIZE
+
+        ISA --&gt; LEGALIZE
+        REGS --&gt; ISEL
+        COST --&gt; ISEL
+
+        CUSTOM --&gt; DAG
+        PSEUDO --&gt; MI
+    end
+
+    MF --&gt; OUT["Machine IR&lt;br/&gt;&lt;br/&gt;
+    &lt;b&gt;Output of Instruction Selection&lt;/b&gt;"]
+
+    classDef boundary fill:#ffffff,stroke:#58963c,stroke-width:2px,stroke-dasharray:5 4;
+    classDef backend fill:#e9f5e2,stroke:#58963c,stroke-width:1.5px;
+
+    class IN,OUT boundary;
+    class ISA,REGS,COST,ABI backend;
+    class LEGALIZE,TYPE,CALL,CUSTOM backend;
+    class PATTERN,DAG,ISEL,PSEUDO backend;
+    class MI,BLOCKS,MF backend;
+
+    style BACKEND fill:#f8fcf5,stroke:#58963c,stroke-width:2px,stroke-dasharray:6 4
+    style TARGET fill:#ffffff,stroke:#75ad5c
+    style LOWER fill:#ffffff,stroke:#75ad5c
+    style SELECT fill:#ffffff,stroke:#75ad5c
+    style MIR fill:#ffffff,stroke:#75ad5c
+</pre>
+
+<footer id="last-change-10">Last change: <time datetime="2026-08-10">2026-08-10</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/ecffde6">ecffde6</a></footer>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
@@ -2165,6 +2801,8 @@ The return type must be of a first class type so basically it must be of the pri
         <script src="book-609e4cb8.js"></script>
 
         <!-- Custom JS scripts -->
+        <script src="mermaid-eefea253.min.js"></script>
+        <script src="mermaid-init-a9b262ed.js"></script>
 
         <script>
         window.addEventListener('load', function() {

@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en" class="ayu sidebar-visible" dir="ltr">
+<html lang="en" class="rust sidebar-visible" dir="ltr">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
@@ -33,12 +33,12 @@
         <!-- Provide site root and default themes to javascript -->
         <script>
             const path_to_root = "../../";
-            const default_light_theme = "ayu";
-            const default_dark_theme = "ayu";
-            window.path_to_searchindex_js = "../../searchindex-9dea6170.js";
+            const default_light_theme = "rust";
+            const default_dark_theme = "coal";
+            window.path_to_searchindex_js = "../../searchindex-cd605608.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-02661081.js"></script>
+        <script src="../../toc-a11913ed.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -76,7 +76,7 @@
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             const html = document.documentElement;
-            html.classList.remove('ayu')
+            html.classList.remove('rust')
             html.classList.add(theme);
             html.classList.add("js");
         </script>
@@ -387,7 +387,446 @@ The return type must be of a first class type so basically it must be of the pri
 <p>From the langref :- “Depending on properties of the target machine and the particular switch instruction, this instruction may be code generated in different ways. For example, it could be generated as a series of chained conditional branches or with a lookup table.”</p>
 <h2 id="linkages"><a class="header" href="#linkages">Linkages</a></h2>
 <p>These appear to be information being passed to the linker.</p>
-<footer id="last-change">Last change: <time datetime="2026-08-07">2026-08-07</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/a8941ee">a8941ee</a></footer>
+<h2 id="compiler-architecture-with-llvm-ir"><a class="header" href="#compiler-architecture-with-llvm-ir">Compiler Architecture with LLVM IR</a></h2>
+<h3 id="frontend-phase"><a class="header" href="#frontend-phase">Frontend Phase</a></h3>
+<pre class="mermaid">flowchart TD
+
+    SOURCE["Source Program&lt;br/&gt;&lt;b&gt;foo.c&lt;/b&gt;"]
+
+    PREPROCESS["Preprocessing&lt;br/&gt;&lt;br/&gt;
+    • #include expansion&lt;br/&gt;
+    • #define expansion&lt;br/&gt;
+    • Conditional compilation"]
+
+    SOURCE --&gt; PREPROCESS
+
+    subgraph FRONTEND["FRONT-END — LANGUAGE DEPENDENT"]
+        direction TB
+
+        subgraph LEX["1. Lexical Analysis"]
+            direction TB
+
+            CHAR["Source Characters"]
+
+            SCANNER["Scanner / Lexer&lt;br/&gt;&lt;br/&gt;
+            • Keywords&lt;br/&gt;
+            • Identifiers&lt;br/&gt;
+            • Literals&lt;br/&gt;
+            • Operators&lt;br/&gt;
+            • Punctuation"]
+
+            TOKENS["Token Stream"]
+
+            CHAR --&gt; SCANNER --&gt; TOKENS
+        end
+
+        subgraph PARSE["2. Syntax Analysis"]
+            direction TB
+
+            PARSER["Parser&lt;br/&gt;&lt;br/&gt;
+            Grammar checking&lt;br/&gt;
+            Error recovery"]
+
+            CST["Concrete Syntax Tree"]
+
+            AST["Abstract Syntax Tree&lt;br/&gt;&lt;br/&gt;
+            • Expressions&lt;br/&gt;
+            • Statements&lt;br/&gt;
+            • Declarations&lt;br/&gt;
+            • Functions"]
+
+            TOKENS --&gt; PARSER --&gt; CST --&gt; AST
+        end
+
+        subgraph SEMANTIC["3. Semantic Analysis"]
+            direction TB
+
+            NAME["Name Resolution&lt;br/&gt;&lt;br/&gt;
+            • Scope resolution&lt;br/&gt;
+            • Identifier binding"]
+
+            TYPE["Type Checking&lt;br/&gt;&lt;br/&gt;
+            • Type compatibility&lt;br/&gt;
+            • Conversions&lt;br/&gt;
+            • Function signatures"]
+
+            SYMBOL["Symbol Table&lt;br/&gt;&lt;br/&gt;
+            • Variables&lt;br/&gt;
+            • Functions&lt;br/&gt;
+            • Types&lt;br/&gt;
+            • Storage information"]
+
+            AST --&gt; NAME
+            AST --&gt; TYPE
+            AST --&gt; SYMBOL
+        end
+
+        subgraph IRGEN["4. IR Generation"]
+            direction TB
+
+            LOWER["AST Lowering&lt;br/&gt;&lt;br/&gt;
+            High-level constructs&lt;br/&gt;
+            → lower-level operations"]
+
+            CFG["Initial Control-Flow Graph&lt;br/&gt;&lt;br/&gt;
+            • Basic blocks&lt;br/&gt;
+            • Branches&lt;br/&gt;
+            • Returns"]
+
+            IR["Intermediate Representation&lt;br/&gt;&lt;br/&gt;
+            • Operations&lt;br/&gt;
+            • Loads / Stores&lt;br/&gt;
+            • Calls&lt;br/&gt;
+            • Branches"]
+
+            SSA["SSA Form&lt;br/&gt;&lt;br/&gt;
+            • Single assignment&lt;br/&gt;
+            • Explicit data flow&lt;br/&gt;
+            • Φ nodes"]
+
+            LOWER --&gt; CFG --&gt; IR --&gt; SSA
+        end
+
+        SCANNER --&gt; PARSER
+        AST --&gt; LOWER
+        NAME --&gt; LOWER
+        TYPE --&gt; LOWER
+        SYMBOL --&gt; LOWER
+    end
+
+    PREPROCESS --&gt; CHAR
+
+    SSA --&gt; OUT["LLVM IR / SSA&lt;br/&gt;&lt;br/&gt;
+    &lt;b&gt;Output of Front-End&lt;/b&gt;"]
+
+    classDef source fill:#fff4cc,stroke:#c99400,stroke-width:2px;
+    classDef frontend fill:#e8f2fc,stroke:#3978b9,stroke-width:1.5px;
+    classDef boundary fill:#ffffff,stroke:#3978b9,stroke-width:2px,stroke-dasharray:5 4;
+
+    class SOURCE,PREPROCESS source;
+    class CHAR,SCANNER,TOKENS,PARSER,CST,AST frontend;
+    class NAME,TYPE,SYMBOL frontend;
+    class LOWER,CFG,IR,SSA frontend;
+    class OUT boundary;
+
+    style FRONTEND fill:#f7fbff,stroke:#3978b9,stroke-width:2px,stroke-dasharray:6 4
+    style LEX fill:#ffffff,stroke:#75a9d6
+    style PARSE fill:#ffffff,stroke:#75a9d6
+    style SEMANTIC fill:#ffffff,stroke:#75a9d6
+    style IRGEN fill:#ffffff,stroke:#75a9d6
+</pre>
+
+<h3 id="middle-end-phase"><a class="header" href="#middle-end-phase">Middle-end Phase</a></h3>
+<pre class="mermaid">flowchart TD
+
+    IN["LLVM IR / SSA&lt;br/&gt;&lt;br/&gt;
+    &lt;b&gt;Input from Front-End&lt;/b&gt;"]
+
+    subgraph MIDDLE["MIDDLE-END — MACHINE INDEPENDENT"]
+        direction TB
+
+        subgraph ANALYSIS["1. IR &amp; Program Analysis"]
+            direction TB
+
+            CFG["Control-Flow Analysis&lt;br/&gt;&lt;br/&gt;
+            • Basic blocks&lt;br/&gt;
+            • Dominators&lt;br/&gt;
+            • Dominance frontier&lt;br/&gt;
+            • Reachability"]
+
+            DATAFLOW["Data-Flow Analysis&lt;br/&gt;&lt;br/&gt;
+            • Def-use chains&lt;br/&gt;
+            • Liveness&lt;br/&gt;
+            • Available expressions"]
+
+            ALIAS["Alias Analysis&lt;br/&gt;&lt;br/&gt;
+            • Memory dependencies&lt;br/&gt;
+            • Pointer relationships"]
+
+            CALLGRAPH["Call-Graph Analysis&lt;br/&gt;&lt;br/&gt;
+            • Callers / callees&lt;br/&gt;
+            • Recursion&lt;br/&gt;
+            • Inlining candidates"]
+
+            LOOP["Loop Analysis&lt;br/&gt;&lt;br/&gt;
+            • Loop detection&lt;br/&gt;
+            • Nesting&lt;br/&gt;
+            • Induction variables"]
+
+        end
+
+        subgraph CANON["2. Canonicalization"]
+            direction TB
+
+            CFGSIMPLIFY["CFG Simplification&lt;br/&gt;&lt;br/&gt;
+            • Remove unreachable blocks&lt;br/&gt;
+            • Merge blocks&lt;br/&gt;
+            • Simplify branches"]
+
+            INSTSIMPLIFY["Instruction Simplification&lt;br/&gt;&lt;br/&gt;
+            • Normalize operations&lt;br/&gt;
+            • Simplify expressions&lt;br/&gt;
+            • Remove identities"]
+
+            SSACLEAN["SSA Simplification&lt;br/&gt;&lt;br/&gt;
+            • Simplify Φ nodes&lt;br/&gt;
+            • Remove redundant values"]
+        end
+
+        subgraph SCALAR["3. Scalar Optimizations"]
+            direction TB
+
+            CF["Constant Folding"]
+            CP["Constant Propagation"]
+            CSE["Common Subexpression&lt;br/&gt;Elimination"]
+            DCE["Dead Code Elimination"]
+            COPY["Copy Propagation"]
+            GVN["Global Value Numbering"]
+            INSTCOMB["Instruction Combining"]
+
+            CF --&gt; CP --&gt; CSE --&gt; DCE
+            CP --&gt; COPY --&gt; GVN --&gt; INSTCOMB
+        end
+
+        subgraph MEMORY["4. Memory Optimizations"]
+            direction TB
+
+            M2R["Mem2Reg&lt;br/&gt;&lt;br/&gt;
+            Memory → SSA registers"]
+
+            SROA["SROA&lt;br/&gt;&lt;br/&gt;
+            Scalar Replacement&lt;br/&gt;
+            of Aggregates"]
+
+            LOAD["Load / Store Optimization"]
+
+            DSE["Dead Store Elimination"]
+
+            M2R --&gt; SROA --&gt; LOAD --&gt; DSE
+        end
+
+        subgraph LOOP["5. Loop Optimizations"]
+            direction TB
+
+            LICM["LICM&lt;br/&gt;&lt;br/&gt;
+            Loop-Invariant&lt;br/&gt;
+            Code Motion"]
+
+            ROTATE["Loop Rotation"]
+
+            UNROLL["Loop Unrolling"]
+
+            INDUCTION["Induction Variable&lt;br/&gt;Optimization"]
+
+            VECTOR["Loop Vectorization"]
+
+            LICM --&gt; ROTATE --&gt; UNROLL --&gt; INDUCTION --&gt; VECTOR
+        end
+
+        subgraph IPO["6. Interprocedural Optimization"]
+            direction TB
+
+            INLINE["Function Inlining"]
+
+            DEVIRT["Devirtualization"]
+
+            ARG["Argument / Return&lt;br/&gt;Propagation"]
+
+            GLOBAL["Global Optimization"]
+
+            INLINE --&gt; DEVIRT --&gt; ARG --&gt; GLOBAL
+        end
+
+        subgraph PIPELINE["7. Optimization Pipeline"]
+            direction TB
+
+            PASSES["Pass Pipeline&lt;br/&gt;&lt;br/&gt;
+            Analysis&lt;br/&gt;
+            ↓&lt;br/&gt;
+            Transformation&lt;br/&gt;
+            ↓&lt;br/&gt;
+            Analysis&lt;br/&gt;
+            ↓&lt;br/&gt;
+            Transformation"]
+
+            OPTIR["Optimized LLVM IR&lt;br/&gt;&lt;br/&gt;
+            &lt;b&gt;Target-independent&lt;/b&gt;"]
+
+            PASSES --&gt; OPTIR
+        end
+
+        IN --&gt; CFG
+        IN --&gt; DATAFLOW
+        IN --&gt; ALIAS
+        IN --&gt; CALLGRAPH
+        IN --&gt; LOOP
+
+        CFG --&gt; CFGSIMPLIFY
+        DATAFLOW --&gt; INSTSIMPLIFY
+        LOOP --&gt; SSACLEAN
+
+        CFGSIMPLIFY --&gt; PASSES
+        INSTSIMPLIFY --&gt; PASSES
+        SSACLEAN --&gt; PASSES
+
+        CSE --&gt; PASSES
+        DCE --&gt; PASSES
+        GVN --&gt; PASSES
+        INSTCOMB --&gt; PASSES
+
+        SROA --&gt; PASSES
+        LOAD --&gt; PASSES
+        DSE --&gt; PASSES
+
+        VECTOR --&gt; PASSES
+
+        GLOBAL --&gt; PASSES
+    end
+
+    OPTIR --&gt; OUT["Optimized LLVM IR&lt;br/&gt;&lt;br/&gt;
+    &lt;b&gt;Output of Middle-End&lt;/b&gt;"]
+
+    classDef boundary fill:#ffffff,stroke:#8148b5,stroke-width:2px,stroke-dasharray:5 4;
+    classDef middle fill:#f0e8fa,stroke:#8148b5,stroke-width:1.5px;
+
+    class IN,OUT boundary;
+    class CFG,DATAFLOW,ALIAS,CALLGRAPH,LOOP middle;
+    class CFGSIMPLIFY,INSTSIMPLIFY,SSACLEAN middle;
+    class CF,CP,CSE,DCE,COPY,GVN,INSTCOMB middle;
+    class M2R,SROA,LOAD,DSE middle;
+    class LICM,ROTATE,UNROLL,INDUCTION,VECTOR middle;
+    class INLINE,DEVIRT,ARG,GLOBAL middle;
+    class PASSES,OPTIR middle;
+
+    style MIDDLE fill:#fbf8ff,stroke:#8148b5,stroke-width:2px,stroke-dasharray:6 4
+    style ANALYSIS fill:#ffffff,stroke:#a779c9
+    style CANON fill:#ffffff,stroke:#a779c9
+    style SCALAR fill:#ffffff,stroke:#a779c9
+    style MEMORY fill:#ffffff,stroke:#a779c9
+    style LOOP fill:#ffffff,stroke:#a779c9
+    style IPO fill:#ffffff,stroke:#a779c9
+    style PIPELINE fill:#ffffff,stroke:#a779c9
+    
+</pre>
+
+<h3 id="backend-phase"><a class="header" href="#backend-phase">Backend Phase</a></h3>
+<pre class="mermaid">flowchart TD
+
+    IN["Optimized LLVM IR&lt;br/&gt;&lt;br/&gt;
+    &lt;b&gt;Input from Middle-End&lt;/b&gt;"]
+
+    subgraph BACKEND["BACK-END — TARGET DEPENDENT"]
+        direction TB
+
+        subgraph TARGET["1. Target Description"]
+            direction TB
+
+            ISA["Target ISA&lt;br/&gt;&lt;br/&gt;
+            x86-64&lt;br/&gt;
+            AArch64&lt;br/&gt;
+            RISC-V&lt;br/&gt;
+            ..."]
+
+            REGS["Register File&lt;br/&gt;&lt;br/&gt;
+            • General registers&lt;br/&gt;
+            • Vector registers&lt;br/&gt;
+            • Special registers"]
+
+            COST["Target Costs&lt;br/&gt;&lt;br/&gt;
+            • Latency&lt;br/&gt;
+            • Throughput&lt;br/&gt;
+            • Register pressure"]
+
+            ABI["ABI / Calling Convention&lt;br/&gt;&lt;br/&gt;
+            • Argument passing&lt;br/&gt;
+            • Return values&lt;br/&gt;
+            • Stack layout"]
+
+        end
+
+        subgraph LOWER["2. Target Lowering"]
+            direction TB
+
+            LEGALIZE["Legalization&lt;br/&gt;&lt;br/&gt;
+            Convert unsupported&lt;br/&gt;
+            IR operations"]
+
+            TYPE["Type Legalization&lt;br/&gt;&lt;br/&gt;
+            Adapt unsupported&lt;br/&gt;
+            data types"]
+
+            CALL["Calling Convention&lt;br/&gt;Lowering"]
+
+            CUSTOM["Target-Specific Lowering&lt;br/&gt;&lt;br/&gt;
+            • Addressing modes&lt;br/&gt;
+            • Special instructions&lt;br/&gt;
+            • Intrinsics"]
+
+            LEGALIZE --&gt; TYPE --&gt; CUSTOM
+            ABI --&gt; CALL
+        end
+
+        subgraph SELECT["3. Instruction Selection"]
+            direction TB
+
+            PATTERN["Instruction Pattern Matching&lt;br/&gt;&lt;br/&gt;
+            Match IR operations&lt;br/&gt;
+            to target instructions"]
+
+            DAG["Selection DAG / GlobalISel&lt;br/&gt;&lt;br/&gt;
+            Instruction dependencies"]
+
+            ISEL["Instruction Selection&lt;br/&gt;&lt;br/&gt;
+            IR operations&lt;br/&gt;
+            → target operations"]
+
+            PSEUDO["Pseudo Instructions"]
+
+            DAG --&gt; PATTERN --&gt; ISEL --&gt; PSEUDO
+        end
+
+        subgraph MIR["4. Machine IR"]
+            direction TB
+
+            MI["Machine Instructions"]
+
+            BLOCKS["Machine Basic Blocks"]
+
+            MF["Machine Function"]
+
+            MI --&gt; BLOCKS --&gt; MF
+        end
+
+        IN --&gt; LEGALIZE
+
+        ISA --&gt; LEGALIZE
+        REGS --&gt; ISEL
+        COST --&gt; ISEL
+
+        CUSTOM --&gt; DAG
+        PSEUDO --&gt; MI
+    end
+
+    MF --&gt; OUT["Machine IR&lt;br/&gt;&lt;br/&gt;
+    &lt;b&gt;Output of Instruction Selection&lt;/b&gt;"]
+
+    classDef boundary fill:#ffffff,stroke:#58963c,stroke-width:2px,stroke-dasharray:5 4;
+    classDef backend fill:#e9f5e2,stroke:#58963c,stroke-width:1.5px;
+
+    class IN,OUT boundary;
+    class ISA,REGS,COST,ABI backend;
+    class LEGALIZE,TYPE,CALL,CUSTOM backend;
+    class PATTERN,DAG,ISEL,PSEUDO backend;
+    class MI,BLOCKS,MF backend;
+
+    style BACKEND fill:#f8fcf5,stroke:#58963c,stroke-width:2px,stroke-dasharray:6 4
+    style TARGET fill:#ffffff,stroke:#75ad5c
+    style LOWER fill:#ffffff,stroke:#75ad5c
+    style SELECT fill:#ffffff,stroke:#75ad5c
+    style MIR fill:#ffffff,stroke:#75ad5c
+</pre>
+
+<footer id="last-change">Last change: <time datetime="2026-08-10">2026-08-10</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/ecffde6">ecffde6</a></footer>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
@@ -433,6 +872,8 @@ The return type must be of a first class type so basically it must be of the pri
         <script src="../../book-609e4cb8.js"></script>
 
         <!-- Custom JS scripts -->
+        <script src="../../mermaid-eefea253.min.js"></script>
+        <script src="../../mermaid-init-a9b262ed.js"></script>
 
 
 
