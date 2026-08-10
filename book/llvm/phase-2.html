@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Coder&#x27;s fright</title>
+        <title>Phase 2</title>
 
 
         <!-- Custom HTML head -->
@@ -177,71 +177,337 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h2 id="coders-fright"><a class="header" href="#coders-fright">Coder’s fright</a></h2>
-<p>[DISCLAIMER] This is a pre-release version of an unsufficiently tested method that i am espousing. I will expound on it when its done.
-If you have variations of whatever i am trying to put across, feel free to launch a PR.</p>
-<h3 id="battling-your-inner-demons"><a class="header" href="#battling-your-inner-demons">Battling your inner demons</a></h3>
-<p>You know, in all the programming lore that i have come across, none of them
-talk about how difficult it can be to approach a new codebase.</p>
-<p>Ok, it is likely that my observation is biased by the fact that i am a beginner at this and the individuals that get to talk about stuff are experts.
-Probably there is a shift with increase in experience.</p>
-<p>Since the space that mathematics can describe is essentially infinite, i think the ability to be frightened by a codebase can be quantified by a function
-whose parameters are the relative size of the codebase and the average number of new concepts i will encounter per module.</p>
-<p>Of course there are other things like the language in which the codebase is written that will factor in like one’s mastery of the language
-and the degree of specificity<sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup> that the lanuage allows.</p>
-<p>So the size of the codebase will obviously determine the duration you have to spend
-nested in the codebase to have a firm grasp of it.
-New concepts establish the neccessity to be explored especially if they are heavily
-referenced or used in the implementation.
-These create detours that can often be deemed unneccessary since they don’t help in meeting the deadline.</p>
-<p>I’ll probably come back to the utility of such detours but as for now let us
-explore our newfound fear.</p>
-<p>So perhaps you are trying to be a systems engineer and there you are staring at a backend whose default mode of operation is with async executions and has also decided to use a threadpool in their implementation.</p>
-<p>If you are sufficiently green, you have a vague idea of what asynchronous execution
-means, and if you are lucky enough you have been exposed to it through languages like Go.
-You are unaware of synchronization primitives and your working assumption is all computation that has been
-parrallelized is in optimal working conditions.
-Threadpools to you are similar to unicorns.</p>
-<h3 id="strategizing"><a class="header" href="#strategizing">Strategizing</a></h3>
-<p>At this point the codebase is like a predator and you are its prey.
-Its primary intent is to crush your spirit and remind you of your inefficiencies.
-It shouts of your incompetence.</p>
-<p>You start looking into asynchrony. When you scratch its surface you come across the
-notion of a runtime, an executor and you learn of a way to mimic the operating
-system’s scheduler.</p>
-<p>Now to get to understanding the scheduler you have to go a layer deeper.
-It is there that you get a proper introduction to computer organization and its architecture.
-If you pay heed to the call of adventure you get thrown into a world filled with
-ISAs. The scales fall off your eyes and now what emerges is the realisation that “the
-world is way larger than the computer you are hunched over”.</p>
-<p>If you are a grown up, you cease the pursuit and retrace your steps. You have work to do.</p>
-<p>Personally that is where my kind of trouble begins because i have always found that going
-a layer deeper always yielded a better picture.</p>
-<p>Now, if you are going to understand a codebase there is getting familiar with the “literature”
-and then there is getting to understand the implications of the “literature” as applied or implemented.</p>
-<p>Grasping the implications requires a whole roadtrip. You play out the serial execution as it occurs in the codebase
-and verify the correctness or quality of emergent logic from the order of executions.</p>
-<p>Getting to that point alone can be immensely satisfying but now there is a kick to this kick.
-Now you want to modify the logic to enhance either perfomance or enhance usability by probably adding an extension.</p>
-<p>If you have ever traced a circuit using probes maybe you’ll relate to this. Adding an extension to the codebase is similar to knowing the exact places to tap in a closed circuit.
-It is like knowing exactly which points can i attach to and i get the exact expected output.</p>
-<p>The real kick is probably in enhancing performance. To enhance perfomance you have to breakdown the implementation detail.</p>
-<p>From an operation that was simply responding to requests to access files to picturing
-threads (async or otherwise) that are listening to requests make a malloc call to allocate a buffer,
-read a file into that buffer before transmitting it through the sockets.
-Now you have to figure out where is it that you wasting time in and why.
-Once you have found out you make a point of probably not touching the memory as often if memory was the bottleneck or
-you decide to switch the allocator all together.
-If that’s not enough and you have sufficient memory, you probably make the opening
-of certain frequently accessed texts to be opened early enough to prevent several consecutive syscalls.</p>
-<p>There is probably a trick about maintaining socket liveness to escape the handshake thing but anyway.
-Those who are serious enough switch to io-uring.</p>
-<p>I believe that it is in the pursuit of this kick that optimization engineers live.</p>
+                        <p><strong>Inside LLVM: Engineering a Target-Independent Compiler</strong><br><strong>Part 2 — LLVM IR: Designing a Universal Contract</strong><br><strong>The Interface Between Languages and Machines</strong></p>
+<h3 id="1-the-question"><a class="header" href="#1-the-question">1. The Question</a></h3>
+<p>In Part 1 we established why LLVM was organized as a collection of reusable libraries.
+The primary objective was to find a way to at least reduce the need to always reinvent the wheel.
+A new language no longer needs to invent its own optimizer, and a new architecture no longer needs to reimplement an entire compiler.</p>
+<p>That architecture, however, rests on a single, critical assumption:</p>
+<p>The existence of a common representation that every frontend can produce and
+that the shared optimizer and backends can consume.(so the IR is load bearing to its success)
+In the absence of such a representation, the library boundaries described in
+Part 1 would be meaningless. Each frontend would still be forced to speak a private language to the rest of the system.</p>
+<p>The central question of this article is therefore:</p>
+<p><strong>How can Clang, Rust, Swift, Zig, and many other languages all feed the same optimizer?</strong></p>
+<p>The answer is LLVM IR — not merely as a data format, but as a carefully engineered software contract.</p>
+<h3 id="2-the-limitation"><a class="header" href="#2-the-limitation">2. The Limitation</a></h3>
+<p>Two natural candidates already existed long before LLVM.</p>
+<p>(a). <strong>Abstract Syntax Trees</strong> preserve almost everything a frontend knows about the source program:
+syntactic structure, types, scopes, and language-specific semantics. They are excellent for language-specific
+analysis and transformation. They are poor candidates for a shared abstraction.
+Their use results to a fragile interface that proves constricting to language designers
+(There are only so many language grammars a single AST can represent).</p>
+<p>An AST for Rust’s ownership and borrowing rules has little in common with an AST for C’s
+unchecked pointers or Swift’s reference counting. An optimizer written against one would be
+nearly useless for the others. The N × M problem would simply reappear at the level of tree walks and type checkers.</p>
+<p>Consider:</p>
+<pre><code class="language-c">int add_one(int x) {
+    return x + 1;
+}
+</code></pre>
+<p>At the source/AST level, the compiler still sees language concepts:</p>
+<pre><code class="language-text">FunctionDecl
+└── name: add_one
+    return type: int
+    parameter:
+        └── x : int
+    body:
+        └── ReturnStmt
+            └── BinaryOperator '+'
+                ├── DeclRefExpr: x
+                └── IntegerLiteral: 1
+</code></pre>
+<p>It knows that this is a C function, that <code>x</code> is an <code>int</code>, that <code>+</code> is a source-level
+addition expression, and that the expression is the operand of a <code>return</code>.</p>
+<p>Note: This example may not clearly illustrate the advantages of LLVM IR over ASTs
+because of the stable way in which function structures are conceptualized across different
+languages. But try thinking of language specific contexts. For instance, the various ways in which
+object oriented languages model shared behavior. (Just pick a language specific context)</p>
+<p>In contrast, LLVM IR has deliberately forgotten most of that:</p>
+<pre><code class="language-llvm">define i32 @add_one(i32 %x) {
+entry:
+  %add = add i32 %x, 1
+  ret i32 %add
+}
+</code></pre>
+<p>There is no <code>ReturnStmt</code>, no <code>BinaryOperator</code> AST node, and no C-specific notion of an <code>int</code> declaration.
+This means the constrain to neccessarily use the return keyword is lifted.(Of course, the space with
+which one can describe what it means for a function to have a return value is limited but
+at least it affords the authors a way to describe what it means for a function to have a return
+value without being tied to a keyword or notation).</p>
+<p>Programming languages are avenues to think about what is underneath.</p>
+<p>The important point is not that LLVM IR contains <em>less information</em>. It contains <strong>different information</strong>: source-language structure has been replaced by explicit computation.</p>
+<p>To further illustrate:</p>
+<p>Consider a language level construct as:</p>
+<pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn increment(x: i32) -&gt; i32 {
+    x + 1
+}
+<span class="boring">}</span></code></pre>
+<p>The Rust compiler can reason about properties that are meaningful at the Rust level:</p>
+<pre><code class="language-text">Function
+├── name: increment
+├── parameter: x : i32
+├── return type: i32
+└── expression:
+    └── Add
+        ├── x
+        └── integer literal 1
+</code></pre>
+<p>The AST can also retain language-specific information such as:</p>
+<pre><code class="language-text">ownership
+borrowing
+lifetimes
+generic parameters
+traits
+pattern matching
+source locations
+visibility
+attributes
+</code></pre>
+<p>An optimization pass that has to generalise across mulitple target architectures has no need
+to grasp the language-specific details of the source code.</p>
+<p>(b). <strong>Raw assembly or machine code</strong> sits at the opposite extreme. It is already target-specific. Register names,
+instruction encodings, calling conventions, and ABI details are baked in. An optimizer working at this level
+cannot be shared across architectures, and many high-level opportunities (inlining across language boundaries,
+high-level loop transformations, language-independent alias analysis) have already been lost.</p>
+<p>What was missing was a representation that is:</p>
+<ul>
+<li>low enough to model real computation efficiently,</li>
+<li>high enough to support powerful, language-independent optimizations,</li>
+<li>stable enough to serve as a long-lived interface between many independent projects.</li>
+</ul>
+<p>Neither ASTs nor assembly satisfied that combination of requirements. A new abstraction was required<sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup>.</p>
+<h3 id="3-enter-llvm-ir"><a class="header" href="#3-enter-llvm-ir">3. Enter LLVM IR</a></h3>
+<div align="center">
+<pre class="mermaid">flowchart LR
+    Rust["Rust AST&lt;br/&gt;ownership, traits, lifetimes"]
+    C["C AST&lt;br/&gt;pointers, declarations, types"]
+    Swift["Swift AST&lt;br/&gt;ARC, classes, generics"]
+
+    IR["LLVM IR&lt;br/&gt;explicit computation&lt;br/&gt;SSA + types + control flow"]
+
+    OPT["Shared LLVM optimizers"]
+
+    Rust --&gt; IR
+    C --&gt; IR
+    Swift --&gt; IR
+    IR --&gt; OPT
+</pre>
+
+</div>
+
+<p>LLVM IR is that abstraction.</p>
+<p>It occupies the narrow design space between language-specific trees and machine-specific code.
+Frontends lower their ASTs into LLVM IR; the middle-end optimizes that IR without knowing which
+language produced it; backends later lower the optimized IR into Machine IR and ultimately machine
+code.</p>
+<p>Consider our initial function after lowering to a target architecture.</p>
+<p>LLVM IR:</p>
+<pre><code class="language-llvm">define i32 @add_one(i32 %x) {
+entry:
+  %add = add i32 %x, 1
+  ret i32 %add
+}
+</code></pre>
+<p>On an x86-64 System V target, the corresponding assembly can be as simple as:</p>
+<pre><code class="language-asm">add_one:
+    lea     eax, [rdi + 1]
+    ret
+</code></pre>
+<p>On AArch64:</p>
+<pre><code class="language-asm">add_one:
+    add     w0, w0, #1
+    ret
+</code></pre>
+<p>On RISC-V:</p>
+<pre><code class="language-asm">add_one:
+    addi    a0, a0, 1
+    ret
+</code></pre>
+<p>The important observation is that the <strong>LLVM IR is the same</strong>, while the machine instructions differ.</p>
+<p>The conceptual stack is therefore:</p>
+<pre class="mermaid">graph TD
+    A[Language-specific AST] --&gt; B[LLVM IR&lt;br/&gt;← the shared contract]
+    B --&gt; C[Machine IR]
+    C --&gt; D[Machine Code]
+</pre>
+
+<p>Thus, LLVM IR is deliberately not a programming language in the conventional sense. It is a
+<strong>contract</strong> that defines:</p>
+<ul>
+<li>what values exist,</li>
+<li>how control flows,</li>
+<li>what operations are expressible,</li>
+<li>and what properties the optimizer may rely upon.</li>
+</ul>
+<p>Once a frontend has emitted valid LLVM IR, it has fulfilled its primary obligation to the rest of the infrastructure.</p>
+<h3 id="4-the-ir-structure"><a class="header" href="#4-the-ir-structure">4. The IR structure</a></h3>
+<p>Before we get to describing the structure consider the following instance:</p>
+<pre><code class="language-c">int abs_value(int x) {
+    if (x &lt; 0)
+        return -x;
+    return x;
+}
+</code></pre>
+<p>The AST expresses the source structure:</p>
+<pre><code class="language-text">Function
+└── IfStmt
+    ├── condition: x &lt; 0
+    ├── then:
+    │   └── return -x
+    └── else:
+        └── return x
+</code></pre>
+<p>The LLVM IR representation of the <code>abs_value</code> function makes the control-flow structure explicit:</p>
+<pre><code class="language-llvm">define i32 @abs_value(i32 %x) {
+entry:
+  %cmp = icmp slt i32 %x, 0
+  br i1 %cmp, label %negative, label %positive
+
+negative:
+  %neg = sub i32 0, %x
+  br label %done
+
+positive:
+  br label %done
+
+done:
+  %result = phi i32 [ %neg, %negative ], [ %x, %positive ]
+  ret i32 %result
+}
+</code></pre>
+<p>Now the optimizer can see an explicit control-flow graph:</p>
+<pre class="mermaid">flowchart TD
+    Entry["entry&lt;br/&gt;cmp = x &lt; 0"]
+    Negative["negative&lt;br/&gt;neg = 0 - x"]
+    Positive["positive"]
+    Done["done&lt;br/&gt;result = phi(neg, x)"]
+
+    Entry --&gt;|true| Negative
+    Entry --&gt;|false| Positive
+    Negative --&gt; Done
+    Positive --&gt; Done
+</pre>
+
+<p>The <code>phi</code> instruction is important here. It represents the SSA value selected
+according to which predecessor block was taken. LLVM’s language reference
+specifies <code>phi</code> precisely in terms of the predecessor blocks of the current basic block.</p>
+<p>This is something an optimizer benefits from having <strong>explicitly represented</strong> rather than having to
+rediscover from source-level syntax.</p>
+<p>The previous IR contains two control-flow paths.</p>
+<p>But the optimizer may recognize that the computation can be expressed using a conditional move or equivalent target instruction.</p>
+<p>Conceptually:</p>
+<pre><code class="language-text">        x &lt; 0 ?
+       /       \
+    -x           x
+       \       /
+          result
+</code></pre>
+<p>On x86-64, one possible optimized result is:</p>
+<pre><code class="language-asm">abs_value:
+    mov     eax, edi
+    neg     eax
+    cmovns  eax, edi
+    ret
+</code></pre>
+<p>So to further refine the nature of the pipeline, what we currently have is;</p>
+<pre class="mermaid">graph TD
+    A[AST&lt;br/&gt;source-level control structure] --&gt; B[LLVM IR&lt;br/&gt;explicit CFG + SSA]
+    B --&gt; C[Optimization&lt;br/&gt;target-independent transformations]
+    C --&gt; D[Machine-specific lowering]
+    D --&gt; E[x86-64 conditional-move instructions]
+</pre>
+
+<p>At the heart of the IR are a small number of interlocking concepts.</p>
+<p><strong>Values, Users, and Use-Def Chains</strong><br>Every computed result is a <code>Value</code>. Every place that consumes a value is a <code>User</code>. The edges between them
+form use-def and def-use chains. These chains are the primary data structure that almost every analysis and
+transformation walks. Because the IR is in SSA<sup class="footnote-reference" id="fr-2-1"><a href="#footnote-2">2</a></sup> form, each value has a single definition, which
+dramatically simplifies many algorithms.</p>
+<p><strong>Modules, Functions, Basic Blocks, and Instructions</strong><br>A <code>Module</code> is the top-level container (roughly a translation unit). It contains <code>Function</code>s.
+Each function contains <code>BasicBlock</code>s. Each basic block contains a linear sequence of
+<code>Instruction</code>s that ends in a terminator. This hierarchical structure gives optimizers clear units
+of work and clear control-flow graphs.</p>
+<p><strong>The Type System</strong><br>LLVM IR is strongly typed. Integer types of arbitrary bit width, floating-point types, pointers, arrays,
+structs, vectors, and function types are all first-class. The type system is deliberately low-level;
+it does not encode high-level language notions such as classes, ownership, or generics. Those concepts must
+be lowered by the frontend.</p>
+<p><strong>DataLayout</strong><br>While the IR tries to remain target-independent, the physical layout of data cannot be ignored. The <code>DataLayout</code>
+string describes pointer sizes, alignment rules, endianness, and related properties. It is the first controlled leak
+of target information into the “target-independent” IR.</p>
+<p><strong>Attributes, Metadata, and Calling Conventions</strong><br>Function and parameter attributes, metadata nodes, and explicit calling-convention annotations provide the additional
+channels through which frontends and targets communicate information that does not belong in the core instruction set
+(inlining hints, aliasing properties, debug information, exception-handling tables, etc.).</p>
+<p>Together these mechanisms form a complete, self-contained intermediate language that is stable enough to serve as a
+binary interface (bitcode) and expressive enough for serious optimization.</p>
+<h3 id="5-design-trade-offs"><a class="header" href="#5-design-trade-offs">5. Design Trade-offs</a></h3>
+<p>LLVM IR must satisfy two opposing pressures simultaneously.</p>
+<p>It must be <strong>high enough</strong> that the same optimizer can improve code originating from very different languages.
+High-level information that has been needlessly discarded cannot be recovered later.</p>
+<p>It must be <strong>low enough</strong> that the eventual mapping to real hardware remains efficient. An IR that is too abstract
+forces the backend to re-discover facts that should have been explicit.</p>
+<p>The design therefore makes a series of deliberate choices:</p>
+<ul>
+<li>SSA form is required. This simplifies optimization at the cost of making the IR harder to emit directly
+from some frontends.</li>
+<li>The type system is structural and relatively simple. Rich language type systems must be erased or encoded explicitly by
+the frontend.</li>
+<li>Control flow is explicit and unstructured (basic blocks + terminators) rather than structured. This makes many analyses
+uniform at the cost of losing surface syntax.</li>
+<li>Side effects, memory, and concurrency are modeled with a relatively small set of primitive instructions plus attributes
+and metadata.</li>
+</ul>
+<p>These decisions are not inevitable; they are engineering judgments about which complexities belong in the shared middle
+and which complexities should be pushed into frontends or backends.</p>
+<h3 id="6-the-abstraction-leaks"><a class="header" href="#6-the-abstraction-leaks">6. The Abstraction Leaks</a></h3>
+<p>Even though LLVM IR is presented as target-independent, several forms of target knowledge already appear inside it:</p>
+<ul>
+<li><strong>DataLayout</strong> — pointer size, ABI alignment, endianness.</li>
+<li><strong>Target Triple</strong> — identifies the intended architecture, vendor, and operating system.</li>
+<li><strong>Calling conventions</strong> — encoded as attributes because different platforms pass arguments differently.</li>
+<li><strong>Address spaces</strong> — required for some architectures and for certain language features (e.g., GPU memory spaces).</li>
+<li><strong>Atomic memory operations</strong> — whose precise semantics can depend on the target’s memory model.</li>
+</ul>
+<p>These are not accidental impurities. They exist because a purely target-agnostic IR would force either incorrect code or
+an explosion of complexity in every backend. LLVM’s pragmatic stance is that a small, well-documented set of target facts
+may appear early, provided the great majority of optimization remains independent of any particular ISA.</p>
+<p>The presence of these leaks reinforces a principle already stated in Part 1: good abstractions isolate complexity; they
+do not pretend the complexity has vanished.</p>
+<h3 id="7-source-tour"><a class="header" href="#7-source-tour">7. Source Tour</a></h3>
+<p>The core IR implementation lives in two tightly related locations:</p>
+<ul>
+<li><code>llvm/include/llvm/IR/</code> — public headers defining <code>Module</code>, <code>Function</code>, <code>BasicBlock</code>, <code>Instruction</code>, <code>Value</code>, <code>Type</code>, <code>DataLayout</code>, attributes, metadata, and related classes.</li>
+<li><code>llvm/lib/IR/</code> — the corresponding implementations, including the bitcode reader/writer, the assembler/disassembler for
+the textual IR, and the core data structures that maintain use-def chains.</li>
+</ul>
+<p>When reading this code, notice how little of it knows about any particular programming language or processor. That ignorance
+is intentional; it is exactly what allows the same libraries to be reused by many clients.</p>
+<h3 id="8-looking-ahead"><a class="header" href="#8-looking-ahead">8. Looking Ahead</a></h3>
+<p>We now have a common language that many frontends can speak and that a shared optimizer can understand. The next engineering question
+is immediate:</p>
+<p>Once a program has been expressed in LLVM IR, how should a collection of independent analyses and transformations be organized so
+that they remain composable, reusable, and largely target-independent?</p>
+<p>That question leads directly to the Pass Manager and the middle-end contract — the subject of Part 3.</p>
+<h3 id="design-principle-2--define-a-stable-intermediate-contract"><a class="header" href="#design-principle-2--define-a-stable-intermediate-contract">Design Principle #2 — Define a Stable Intermediate Contract</a></h3>
+<p>When many independent producers and consumers must cooperate, introduce a narrow, well-specified intermediate representation
+that both sides can rely upon.
+ASTs were too language-specific. Assembly was too machine-specific. LLVM IR was introduced to occupy the space between them and thereby make the library-based architecture of Part 1 possible. Every later abstraction in LLVM builds on the existence of this contract.</p>
+<h3 id="series-thread"><a class="header" href="#series-thread">Series Thread</a></h3>
+<p>As previously stated or at least hinted at, every abstraction in LLVM exists because the previous one could not adequately contain
+a particular form of complexity.
+The traditional monolithic compiler could not solve the N × M scaling problem → LLVM introduced the compiler-as-libraries abstraction (Part 1).
+ASTs and assembly could not serve as a shared medium between many languages and many targets → LLVM introduced LLVM IR as the universal
+contract (Part 2).</p>
+<p>The next layer will confront a new problem: how to organize dozens of independent optimizations so that they remain maintainable and reusable across all the languages that now speak this common IR.</p>
 <footer id="last-change">Last change: <time datetime="2026-08-11">2026-08-11</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/2789dc3">2789dc3</a></footer>
 <hr>
 <ol class="footnote-definition">
 <li id="footnote-1">
-<p>Certain languages particularly low level ones allow you to have more control of how your data will be computed. This is achieved mostly using compiler intrinsics or lints like those that enforce a particular data alignment. <a href="#fr-1-1">↩</a></p>
+<p>More information can be found from <a href="https://llvm.org/pubs/2005-05-04-LattnerPHDThesis.pdf">Lattner’s thesis</a> and the <a href="https://llvm.org/docs/">LLVM documentation</a>. <a href="#fr-1-1">↩</a></p>
+</li>
+<li id="footnote-2">
+<p><a href="https://pfalcon.github.io/ssabook/latest/book-full.pdf">SSABook</a> <a href="#fr-2-1">↩</a></p>
 </li>
 </ol>
 
@@ -249,11 +515,11 @@ Those who are serious enough switch to io-uring.</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../../book/articles/OnHardwarePatches.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../book/llvm/phase-1.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../../book/articles/IR_justification.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../book/shorts.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -263,11 +529,11 @@ Those who are serious enough switch to io-uring.</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../../book/articles/OnHardwarePatches.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../book/llvm/phase-1.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../../book/articles/IR_justification.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../book/shorts.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>

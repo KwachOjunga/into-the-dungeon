@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Inside LLVM</title>
+        <title>Phase 1</title>
 
 
         <!-- Custom HTML head -->
@@ -35,10 +35,10 @@
             const path_to_root = "../../";
             const default_light_theme = "rust";
             const default_dark_theme = "coal";
-            window.path_to_searchindex_js = "../../searchindex-cd605608.js";
+            window.path_to_searchindex_js = "../../searchindex-9c362a00.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../../toc-a11913ed.js"></script>
+        <script src="../../toc-d7d2aef5.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -191,15 +191,19 @@ for your target machine.</p>
 commercially important. Before long, customers expect support for multiple languages, multiple operating
 systems, and an ever-growing range of processor families.</p>
 <p>You get in the business of supporting infrastructure.</p>
-<p>The problem is no longer writing a <strong>compiler</strong>. The problem is maintaining <strong>an ecosystem of compilers</strong>
+<p>At this point, the problem is no longer writing a <strong>compiler</strong>. The problem is maintaining <strong>an ecosystem of compilers</strong>
 that all need the same optimizations, the same bug fixes, and the same engineering improvements.</p>
-<p><strong>How can one compiler infrastructure support dozens of programming languages and dozens of processor architectures?
-How does it tame such complexity?</strong></p>
-<p>Before we examine any data structure, optimization pass, or backend interface, we must understand the engineering problem that forced LLVM into existence. Modern LLVM is best understood as a response to a scaling problem that traditional compiler architectures could not solve.</p>
+<p><strong>Is it possible to have a compiler infrastructure that supports dozens of programming languages and dozens of processor architectures?
+How will it tame such complexity?</strong></p>
+<p>Before we examine any data structure, optimization pass, or backend interface, it makes sense to understand the engineering
+problem that forced LLVM into existence.
+Modern LLVM is best understood as a response to a scaling problem that
+traditional compiler architectures could not solve.</p>
 <hr>
 <h2 id="2-the-limitation"><a class="header" href="#2-the-limitation">2. The Limitation</a></h2>
 <p>A traditional compiler is often presented as a simple linear pipeline.</p>
-<p>For a compiler supporting one language and one architecture, this design works remarkably well. Every phase is built specifically for that single combination, allowing the implementation to be tightly integrated.
+<p>For a compiler supporting one language and one architecture, this design works remarkably well. Every phase
+is built specifically for that single combination, allowing the implementation to be tightly integrated.
 The difficulties begin when either side of the pipeline grows.
 Suppose we wish to support five programming languages targeting three processor architectures.</p>
 <pre><code class="language-text">                
@@ -208,13 +212,12 @@ Languages
 |---C++                        
 |---Rust               x86       ARM      RISC-V
 |---Swift                |________|_________|
-|---Zig          
-             
+|---Zig              
 
 5 Languages × 3 Architectures = 15 compiler combinations
 </code></pre>
 <p>Without a shared infrastructure, every combination requires its own compilation pipeline.
-s more languages and architectures are added, the amount of duplicated engineering effort
+If more languages and architectures are added, the amount of duplicated engineering effort
 grows rapidly.</p>
 <p>This phenomenon is commonly known as the <strong>N × M problem</strong>.</p>
 <p>The difficulty extends far beyond parsing source code or generating machine instructions.
@@ -227,12 +230,15 @@ forms, each evolving independently, each accumulating its own bugs and maintenan
 <p>The traditional architecture therefore suffered from two fundamental scaling problems:</p>
 <ol>
 <li><strong>The N × M problem</strong> — every new frontend or backend increases the number of compiler combinations that must be maintained.</li>
-<li><strong>The non-reusable middle</strong> — the most sophisticated and valuable parts of a compiler, namely its analyses and optimizations, could not easily be shared across languages or architectures.</li>
+<li><strong>A non-reusable middle</strong> — the most sophisticated and valuable parts of a compiler, namely its analyses and optimizations, could not easily be shared across languages or architectures.</li>
 </ol>
-<p>As software development expanded beyond a handful of languages and processor families, these problems became increasingly expensive. The challenge was no longer writing compilers—it was preventing compiler engineering effort from growing exponentially.</p>
+<p>As software development expanded beyond a handful of languages and processor families,
+these problems became increasingly expensive. The challenge was no longer writing compilers
+— it was preventing compiler engineering effort from growing exponentially.</p>
 <hr>
 <h2 id="3-the-new-abstraction"><a class="header" href="#3-the-new-abstraction">3. The New Abstraction</a></h2>
-<p>LLVM’s most significant innovation was <strong>not</strong> LLVM IR.</p>
+<p>While LLVM IR is a critical component of the infrastructure, I would argue that
+LLVM’s most significant innovation was <strong>not</strong> the IR<sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup>.</p>
 <p>Its most significant innovation was architectural.</p>
 <p>Rather than treating a compiler as a single executable that performs every stage internally, LLVM treats a compiler as <strong>a collection of reusable libraries</strong>.</p>
 <p>The resulting architecture appears deceptively simple:</p>
@@ -356,9 +362,9 @@ or a research tool can be.</p>
 <p>Far more than an intermediate representation, LLVM IR is the central contract around which the entire LLVM ecosystem is built. It is expressive enough to represent a wide variety of source languages, yet constrained enough to enable powerful, target-independent optimizations.</p>
 <p>In Part 2, we will examine why abstract syntax trees are insufficient, why raw assembly is insufficient, and how LLVM IR was engineered to occupy the narrow but crucial space between them.</p>
 <hr>
-<h2 id="design-principle-1--isolate-variation"><a class="header" href="#design-principle-1--isolate-variation">Design Principle #1 — Isolate Variation</a></h2>
+<h2 id="design-principle-1--isolate-variations"><a class="header" href="#design-principle-1--isolate-variations">Design Principle #1 — Isolate variations</a></h2>
 <blockquote>
-<p><strong>When different parts of a system evolve for different reasons, separate them behind a stable interface.</strong></p>
+<p><strong>When different parts of a system evolve for different reasons, separate them behind a stable interface.</strong><sup class="footnote-reference" id="fr-2-1"><a href="#footnote-2">2</a></sup></p>
 <p>Programming languages and processor architectures evolve independently. LLVM’s first architectural decision was to isolate those two axes of change so that new languages and new targets could reuse the same optimization and code-generation infrastructure. Every major abstraction introduced later in LLVM is an extension of this same principle.</p>
 </blockquote>
 <hr>
@@ -367,16 +373,26 @@ or a research tool can be.</p>
 <p><strong>Every abstraction in LLVM exists because the previous one could not adequately contain a particular form of complexity.</strong></p>
 <p>The traditional monolithic compiler could not solve the <strong>N × M scaling problem</strong>. LLVM’s first abstraction—treating the compiler as a collection of reusable libraries—was introduced to solve exactly that problem. Every subsequent layer in the series will reveal another engineering challenge, another abstraction, and another carefully chosen boundary.</p>
 </blockquote>
-<footer id="last-change">Last change: <time datetime="2026-08-10">2026-08-10</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/ecffde6">ecffde6</a></footer>
+<footer id="last-change">Last change: <time datetime="2026-08-11">2026-08-11</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/2789dc3">2789dc3</a></footer>
+<hr>
+<ol class="footnote-definition">
+<li id="footnote-1">
+<p>Joran Dirk Greef <a href="https://www.youtube.com/watch?v=yKgfk8lTQuE&amp;t=2793s&amp;pp=ygUZdGhlIHBvd2VyIG9mIGFuIGludGVyZmFjZQ%3D%3D">may disagree with me on this</a>. <a href="#fr-1-1">↩</a></p>
+</li>
+<li id="footnote-2">
+<p>One thing that is observable in hardware/sotware interface, any time one encounters a relatively radical idea, chances are a new functional unit is involved. <a href="#fr-2-1">↩</a></p>
+</li>
+</ol>
+
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../../book/articles/IR_justification.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../book/llvm/intro.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../../book/shorts.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../book/llvm/phase-2.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -386,11 +402,11 @@ or a research tool can be.</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../../book/articles/IR_justification.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../book/llvm/intro.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../../book/shorts.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../book/llvm/phase-2.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>
