@@ -5,6 +5,7 @@
 - [Inside LLVM](./book/llvm/intro.md)
   - [Phase 1](./book/llvm/phase-1.md)
   - [Phase 2](./book/llvm/phase-2.md)
+  - [Phase 3](./book/llvm/phase-3.md)
 - [Shorts](./book/shorts.md)
 - [Ksm Lang](./book/articles/action_plan.md)
 - [Appendices](./book/appendices.md)
