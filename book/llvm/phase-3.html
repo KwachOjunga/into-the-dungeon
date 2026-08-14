@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Phase 1</title>
+        <title>Phase 3</title>
 
 
         <!-- Custom HTML head -->
@@ -177,222 +177,172 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="inside-llvm-engineering-a-target-independent-compiler"><a class="header" href="#inside-llvm-engineering-a-target-independent-compiler"><strong>Inside LLVM: Engineering a Target-Independent Compiler</strong></a></h1>
-<h2 id="why-llvm-exists"><a class="header" href="#why-llvm-exists"><strong>Why LLVM Exists</strong></a></h2>
-<h3 id="from-many-compilers-to-one-infrastructure"><a class="header" href="#from-many-compilers-to-one-infrastructure"><strong>From Many Compilers to One Infrastructure</strong></a></h3>
-<hr>
-<h2 id="1-the-question"><a class="header" href="#1-the-question">1. The Question</a></h2>
-<p>Imagine it is the late 1990s. You form part of a team that has built a successful compiler for a
-single programming language targeting a single processor architecture. The system is well
-understood, the optimizer is producing good code, and the backend reliably emits binaries
-for your target machine.</p>
-<p>Then the requirements change.</p>
-<p>A second programming language needs to be supported. Soon after, a new processor architecture becomes
-commercially important. Before long, customers expect support for multiple languages, multiple operating
-systems, and an ever-growing range of processor families.</p>
-<p>You get in the business of supporting infrastructure.</p>
-<p>At this point, the problem is no longer writing a <strong>compiler</strong>. The problem is maintaining <strong>an ecosystem of compilers</strong>
-that all need the same optimizations, the same bug fixes, and the same engineering improvements.</p>
-<p><strong>Is it possible to have a compiler infrastructure that supports dozens of programming languages and dozens of processor architectures?
-How will it tame such complexity?</strong></p>
-<p>Before we examine any data structure, optimization pass, or backend interface, it makes sense to understand the engineering
-problem that forced LLVM into existence.
-Modern LLVM is best understood as a response to a scaling problem that
-traditional compiler architectures could not solve.</p>
-<hr>
-<h2 id="2-the-limitation"><a class="header" href="#2-the-limitation">2. The Limitation</a></h2>
-<p>A traditional compiler is often presented as a simple linear pipeline.</p>
-<p>For a compiler supporting one language and one architecture, this design works remarkably well. Every phase
-is built specifically for that single combination, allowing the implementation to be tightly integrated.
-The difficulties begin when either side of the pipeline grows.
-Suppose we wish to support five programming languages targeting three processor architectures.</p>
-<pre><code class="language-text">                
-Languages                  
-|---C                         Targets
-|---C++                        
-|---Rust               x86       ARM      RISC-V
-|---Swift                |________|_________|
-|---Zig              
-
-5 Languages × 3 Architectures = 15 compiler combinations
-</code></pre>
-<p>Without a shared infrastructure, every combination requires its own compilation pipeline.
-If more languages and architectures are added, the amount of duplicated engineering effort
-grows rapidly.</p>
-<p>This phenomenon is commonly known as the <strong>N × M problem</strong>.</p>
-<p>The difficulty extends far beyond parsing source code or generating machine instructions.
-Every compiler benefits from sophisticated analyses and optimizations: dead code elimination,
-loop optimizations, common subexpression elimination, function inlining, register allocation,
-instruction scheduling, and many others.</p>
-<p>In a traditional architecture, improvements to these algorithms often had to be implemented repeatedly
-across multiple compiler implementations. The same optimization might exist in several slightly different
-forms, each evolving independently, each accumulating its own bugs and maintenance costs.</p>
-<p>The traditional architecture therefore suffered from two fundamental scaling problems:</p>
-<ol>
-<li><strong>The N × M problem</strong> — every new frontend or backend increases the number of compiler combinations that must be maintained.</li>
-<li><strong>A non-reusable middle</strong> — the most sophisticated and valuable parts of a compiler, namely its analyses and optimizations, could not easily be shared across languages or architectures.</li>
-</ol>
-<p>As software development expanded beyond a handful of languages and processor families,
-these problems became increasingly expensive. The challenge was no longer writing compilers
-— it was preventing compiler engineering effort from growing exponentially.</p>
-<hr>
-<h2 id="3-the-new-abstraction"><a class="header" href="#3-the-new-abstraction">3. The New Abstraction</a></h2>
-<p>While LLVM IR is a critical component of the infrastructure, I would argue that
-LLVM’s most significant innovation was <strong>not</strong> the IR<sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup>.</p>
-<p>Its most significant innovation was architectural.</p>
-<p>Rather than treating a compiler as a single executable that performs every stage internally, LLVM treats a compiler as <strong>a collection of reusable libraries</strong>.</p>
-<p>The resulting architecture appears deceptively simple:</p>
-<pre class="mermaid">flowchart TD
-    A["Source Language"]
-    B["Frontend&lt;br/&gt;&lt;br/&gt;Clang · Rust · Swift · Zig · ..."]
-    C["LLVM IR"]
-    D["Middle-End Optimizer"]
-    E["Backend"]
-    F["Machine Code"]
-
-    A --&gt; B
-    B --&gt; C
-    C --&gt; D
-    D --&gt; E
-    E --&gt; F
-
-    classDef source fill:#fff4cc,stroke:#c99400,stroke-width:2px,color:#222;
-    classDef frontend fill:#e8f2fc,stroke:#3978b9,stroke-width:2px,color:#222;
-    classDef ir fill:#f0e8fa,stroke:#8148b5,stroke-width:2px,color:#222;
-    classDef optimizer fill:#f0e8fa,stroke:#8148b5,stroke-width:2px,color:#222;
-    classDef backend fill:#e9f5e2,stroke:#58963c,stroke-width:2px,color:#222;
-    classDef machine fill:#fff4cc,stroke:#c99400,stroke-width:2px,color:#222;
-
-    class A source;
-    class B frontend;
-    class C ir;
-    class D optimizer;
-    class E backend;
-    class F machine;
-</pre>
-
-<p>The frontend becomes responsible for understanding a programming language and translating it into LLVM IR.
-The middle-end performs analyses and optimizations without needing to know which language produced the IR.
-The backend translates that optimized IR into machine code for a specific processor architecture.</p>
-<p>A new language no longer needs to build its own optimizer.
-A new processor architecture no longer needs to implement an entire compiler.
-Instead, both become clients of a common infrastructure.</p>
-<p>It is important to understand what LLVM <strong>does not</strong> solve.</p>
-<p>LLVM does not eliminate the complexity of supporting multiple languages or multiple architectures.
-A frontend must still understand the syntax and semantics of its source language, and every backend
-must still understand the instruction set, calling conventions, and ABI of its target processor.</p>
-<p>What LLVM eliminates is the repeated implementation of everything that lies between those two ends.</p>
-<p>The optimizer, analyses, large portions of the code-generation pipeline, and numerous supporting libraries become shared infrastructure rather than duplicated engineering effort.</p>
-<p>This is the first and most fundamental abstraction in LLVM:</p>
+                        <p><strong>Inside LLVM: Engineering a Target-Independent Compiler</strong><br><strong>Part 3 — Reusing Optimizations Across Architectures</strong><br><strong>The Middle-End Contract</strong></p>
+<h3 id="1-the-question"><a class="header" href="#1-the-question">1. The Question</a></h3>
+<p>Parts 1 and 2 established two foundational abstractions. LLVM is organized as a collection of
+reusable libraries rather than a monolithic compiler, and LLVM IR serves as the stable contract
+that lets many languages feed a single optimizer.</p>
 <blockquote>
-<p><strong>The compiler is no longer a monolithic program. It is a collection of reusable components connected through carefully designed interfaces.</strong></p>
+<p>I hope it is clear by now what the IR is. It is just a data structure that eases the process of reorganizing code structure into what its equivalent hand-written assembly would look like. This means that ideally performing optimizations on the written code is not particularly expensive. In the next few sections, this will be illustrated, hopefully without bringing about much confusion.</p>
 </blockquote>
-<hr>
-<h2 id="4-how-it-works"><a class="header" href="#4-how-it-works">4. How It Works</a></h2>
-<p>LLVM’s architecture is reflected directly in the structure of the project itself.</p>
-<p>At the top level of the repository are independent components rather than a single “compiler” directory.</p>
+<p>A new question now arises.</p>
+<p>If the same IR is produced by frontends as different as Clang, Rustc, and the Swift compiler, why
+should the <em>same</em> sequence of optimizations improve all of them? More precisely:</p>
+<p><strong>Why can the same optimization improve programs written in completely different languages and still produce good code for completely different processors?</strong></p>
+<p>The answer lies in what the middle-end(the contract - LLVMIR) deliberately refuses to know.</p>
+<h3 id="2-the-limitation"><a class="header" href="#2-the-limitation">2. The Limitation</a></h3>
+<p>Once a program has been lowered to LLVM IR, a large collection of analyses and transformations
+become possible:
+dead-code elimination, common-subexpression elimination, sparse conditional constant propagation,
+loop-invariant code motion, inlining, vectorization, and many others.</p>
+<p>If each of these transformations had to be written with intimate knowledge of a particular
+language or a particular micro-architecture, the reuse promised by Parts 1 and 2 would collapse.
+An inliner that understood Rust’s ownership semantics would be useless for C. A loop optimizer that
+hard-coded the characteristics of an Intel Golden Cove branch predictor would generate poor code
+for an ARM Neoverse core or a simple in-order RISC-V microcontroller.</p>
+<p>The middle-end therefore faces a new engineering pressure:</p>
+<p>It must improve code <em>without</em> knowing the source language that produced the IR and <em>without</em>
+knowing most of the micro-architectural details of the processor that will eventually execute it.</p>
+<p>Traditional optimizers often failed this test. Many were deeply entangled with the frontend that fed them
+or with the backend they fed. The result was duplicated effort and optimizations that could not travel.</p>
+<h3 id="3-the-new-abstraction"><a class="header" href="#3-the-new-abstraction">3. The New Abstraction</a></h3>
+<p>LLVM’s response is the <strong>middle-end contract</strong>: a suite of analyses and transformations that operate almost
+exclusively on the properties of LLVM IR itself, together with a narrow, carefully controlled set of target
+queries.</p>
+<p>The optimizer is allowed to rely on:</p>
 <ul>
-<li><code>llvm/</code> — the reusable core libraries, including LLVM IR, analyses, transformations, code generation, target descriptions,</li>
-<li>the MC layer, and TableGen.</li>
-<li><code>clang/</code> — one frontend among many.</li>
-<li><code>lld/</code> — the linker.</li>
-<li><code>compiler-rt/</code> — runtime support libraries required by generated programs.</li>
-<li><code>libcxx/</code>, <code>libcxxabi/</code>, and related projects — the C++ standard library implementation and supporting runtime components.</li>
+<li>the SSA property,</li>
+<li>the explicit control-flow graph,</li>
+<li>the type system,</li>
+<li>the use-def chains,</li>
+<li>and a small number of target descriptors (DataLayout, TargetLibraryInfo, TargetTransformInfo).</li>
 </ul>
-<p>This organization reflects LLVM’s philosophy.
-The optimizer is not owned by Clang.
-The backend is not owned by Clang.
-The IR is not owned by Clang.
-Instead, Clang is itself a client of LLVM’s libraries, just as a JIT compiler, a static compiler, a binary translator,
-or a research tool can be.</p>
-<p>The pipeline shown earlier therefore represents more than compilation stages.</p>
-<p>Each boundary represents a <strong>library interface</strong> designed to isolate one class of variation from another.</p>
-<hr>
-<h2 id="5-why-these-boundaries-exist"><a class="header" href="#5-why-these-boundaries-exist">5. Why These Boundaries Exist</a></h2>
-<p>A recurring theme throughout this series is that LLVM introduces a new abstraction only when an existing one can no longer contain complexity.</p>
-<p>Programming languages evolve independently from processor architectures.</p>
-<p>A language designer may introduce new type systems, ownership models, generics, or concurrency features without changing anything about modern CPUs.</p>
-<p>Likewise, processor architects continue to develop wider vector units, new instruction sets, and increasingly sophisticated microarchitectures without any knowledge of Rust, Swift, or C++.</p>
-<p>LLVM deliberately separates these two axes of variation.</p>
-<p>The boundary between the frontend and the optimizer isolates language-specific complexity.</p>
-<p>The boundary between the optimizer and the backend isolates hardware-specific complexity.</p>
-<p>Rather than allowing these differences to permeate the entire compiler, LLVM confines each category of variation behind a dedicated interface.</p>
-<p>Every major abstraction introduced later in this series follows exactly the same design philosophy.</p>
-<hr>
-<h2 id="6-design-trade-offs"><a class="header" href="#6-design-trade-offs">6. Design Trade-offs</a></h2>
-<p>Library boundaries are not free.</p>
-<p>Every reusable interface must be expressive enough to satisfy many clients without becoming so general that meaningful optimization becomes impossible.</p>
-<p>LLVM IR must simultaneously support Clang, Rust, Swift, Julia, Zig, and many other frontends while remaining suitable for aggressive optimization.</p>
-<p>Likewise, backend interfaces must describe processors ranging from small embedded microcontrollers to large server CPUs and GPUs.</p>
-<p>Designing these interfaces therefore becomes an exercise in balance.</p>
-<p>Interfaces that are too narrow cannot accommodate new languages or architectures.</p>
-<p>Interfaces that are too broad lose precision and become increasingly difficult to optimize effectively.</p>
-<p>Much of LLVM’s evolution can be understood as the continuous refinement of these interfaces.</p>
-<p>The project deliberately accepts additional compile-time complexity and larger libraries in exchange for dramatically lower long-term engineering cost and substantially greater code reuse.</p>
-<hr>
-<h2 id="7-the-abstraction-leaks"><a class="header" href="#7-the-abstraction-leaks">7. The Abstraction Leaks</a></h2>
-<p>Even at this highest level the abstraction is imperfect.</p>
-<p>Target independence is an objective rather than an absolute guarantee.</p>
-<p>Certain information about the target machine must already be available while LLVM IR is being generated. Calling conventions, data layouts, pointer sizes, address spaces, and other architectural properties influence the correctness of generated programs.</p>
-<p>Consequently, LLVM provides carefully controlled mechanisms through which target-specific knowledge flows into otherwise target-independent components.</p>
-<p>These leaks are not failures of the design.</p>
-<p>They are examples of a recurring engineering principle that appears throughout LLVM:</p>
-<blockquote>
-<p><strong>Good abstractions isolate complexity; they do not pretend that complexity no longer exists.</strong></p>
-</blockquote>
-<hr>
-<h2 id="8-source-tour"><a class="header" href="#8-source-tour">8. Source Tour</a></h2>
-<p>The top-level structure of the LLVM project already reveals its architectural philosophy.</p>
+<p>It is <em>not</em> allowed to assume:</p>
 <ul>
-<li><code>llvm/</code> — reusable compiler infrastructure.</li>
-<li><code>clang/</code> — one frontend built on that infrastructure.</li>
-<li><code>lld/</code> — the linker.</li>
-<li><code>compiler-rt/</code> — runtime libraries.</li>
-<li><code>libcxx/</code> and related projects — standard library components.</li>
+<li>a particular finite register file,</li>
+<li>a particular pipeline depth or issue width,</li>
+<li>the presence or accuracy of a branch predictor,</li>
+<li>a particular memory-reordering model,</li>
+<li>or the existence of speculative execution with specific side effects.</li>
 </ul>
-<p>Notice what is absent.</p>
-<p>There is no directory that simply contains “the compiler.”</p>
-<p>Instead, there is a collection of interoperable components that can be assembled in different ways depending on the needs of the tool being built.</p>
-<hr>
-<h2 id="9-looking-ahead"><a class="header" href="#9-looking-ahead">9. Looking Ahead</a></h2>
-<p>We now understand <strong>why</strong> LLVM was organized as a collection of reusable libraries.</p>
-<p>That naturally leads to a deeper question.</p>
-<p>If dozens of programming languages are expected to share a single optimizer, <strong>what common language do they all speak?</strong></p>
-<p>The answer is <strong>LLVM IR</strong>.</p>
-<p>Far more than an intermediate representation, LLVM IR is the central contract around which the entire LLVM ecosystem is built. It is expressive enough to represent a wide variety of source languages, yet constrained enough to enable powerful, target-independent optimizations.</p>
-<p>In Part 2, we will examine why abstract syntax trees are insufficient, why raw assembly is insufficient, and how LLVM IR was engineered to occupy the narrow but crucial space between them.</p>
-<hr>
-<h2 id="design-principle-1--isolate-variations"><a class="header" href="#design-principle-1--isolate-variations">Design Principle #1 — Isolate variations</a></h2>
-<blockquote>
-<p><strong>When different parts of a system evolve for different reasons, separate them behind a stable interface.</strong><sup class="footnote-reference" id="fr-2-1"><a href="#footnote-2">2</a></sup></p>
-<p>Programming languages and processor architectures evolve independently. LLVM’s first architectural decision was to isolate those two axes of change so that new languages and new targets could reuse the same optimization and code-generation infrastructure. Every major abstraction introduced later in LLVM is an extension of this same principle.</p>
-</blockquote>
-<hr>
-<h3 id="series-thread"><a class="header" href="#series-thread"><strong>Series Thread</strong></a></h3>
-<blockquote>
-<p><strong>Every abstraction in LLVM exists because the previous one could not adequately contain a particular form of complexity.</strong></p>
-<p>The traditional monolithic compiler could not solve the <strong>N × M scaling problem</strong>. LLVM’s first abstraction—treating the compiler as a collection of reusable libraries—was introduced to solve exactly that problem. Every subsequent layer in the series will reveal another engineering challenge, another abstraction, and another carefully chosen boundary.</p>
-</blockquote>
+<p>Assumptions that are implementation specific.</p>
+<p>By refusing to know these facts, the same pass can run on IR that originated in C, Rust,
+or Swift and later be lowered to x86-64, AArch64, or RISC-V.</p>
+<p>I think it is quite accurate to say that the IR explicitly refuses to rely on
+specific information unless it is absolutely neccessary.</p>
+<h3 id="4-how-it-works"><a class="header" href="#4-how-it-works">4. How It Works</a></h3>
+<p>The middle-end is organized as a pipeline of <strong>passes</strong>. Each pass is either an analysis
+(computing information such as dominator trees, loop nests, or alias sets) or a transformation
+(rewriting the IR while preserving semantics).</p>
+<p>Modern LLVM uses the New Pass Manager. Analyses are requested on demand and cached; transformations
+declare which analyses they preserve or invalidate. This machinery lets the compiler avoid recomputing
+expensive results and keeps the pipeline composable.</p>
+<p>Two further design decisions keep the middle-end largely target-independent.</p>
+<p><strong>Canonicalization</strong><br>Many passes exist solely to drive the IR toward a smaller set of preferred forms. InstCombine, SimplifyCFG,
+and related passes rewrite instruction sequences into canonical patterns so that later passes see less
+surface variation. Canonical forms are chosen because they are easier to reason about, not because they
+match any particular machine.</p>
+<p><strong>Controlled target queries</strong><br>When a pass truly needs hardware knowledge—most often for cost modeling—it consults TargetTransformInfo (TTI) or
+TargetLibraryInfo (TLI). Vectorizers ask TTI about legal vector widths and the relative cost of shuffles. The inliner
+may ask about call overhead. These queries are deliberate, narrow leaks; the great majority of transformations never
+make them.</p>
+<h4 id="what-the-ir-abstracts-away"><a class="header" href="#what-the-ir-abstracts-away">What the IR Abstracts Away</a></h4>
+<p>LLVM IR presents a simplified model of execution that deliberately erases many hardware realities:</p>
+<ul>
+<li><strong>Infinite virtual registers.</strong> Real processors have small, architecturally visible register files and must spill.
+The middle-end largely ignores this constraint; register allocation occurs later.</li>
+<li><strong>Simple control flow.</strong> IR has basic blocks and terminators. It does not expose branch-predictor tables,
+return-address stacks, or the speculative execution machinery that modern CPUs use to keep pipelines full.</li>
+<li><strong>Sequential consistency within a thread (with explicit atomics).</strong> Real machines reorder loads and stores.
+x86 provides a relatively strong model; ARM and RISC-V provide weaker models that require more barriers.
+The middle-end works with the IR’s memory model and leaves the insertion of the precise fences to later stages
+or to target-specific lowering.</li>
+<li><strong>Uniform instruction costs.</strong> An <code>add</code> in IR is just an <code>add</code>. On a real machine its latency, throughput,
+and ability to execute on multiple ports vary dramatically. Only cost-model-driven passes consult TTI
+for this information.</li>
+</ul>
+<h4 id="concrete-architectural-differences-the-middle-end-mostly-ignores"><a class="header" href="#concrete-architectural-differences-the-middle-end-mostly-ignores">Concrete Architectural Differences the Middle-End Mostly Ignores</a></h4>
+<p>Consider three capabilities that hardware exposes to varying degrees and that aggressive programmers
+sometimes exploit directly.</p>
+<p><strong>Branch prediction and speculative execution</strong><br>High-performance x86 and ARM cores invest heavily in predictors and execute far beyond unresolved branches.
+A misprediction is expensive, so the shape of control flow matters. Some code bases are hand-tuned to make
+branches more predictable or to use conditional moves to avoid them. LLVM IR has no first-class notion of
+“this branch is highly predictable” or “this value was produced by speculation.” The middle-end may convert
+branches into selects (or vice versa) based on simple heuristics and TTI cost models, but it does not try to
+model predictor state. The final decision about branch versus conditional move is left to the backend, where
+target-specific knowledge is available.</p>
+<p><strong>Instruction reordering and out-of-order execution</strong><br>Out-of-order cores (most modern x86 and high-end ARM designs) dynamically reorder independent instructions to
+hide latency. In-order cores (many embedded RISC-V implementations, older ARM cores) do not.
+The middle-end performs <em>static</em> reordering only when it is profitable under a simplified cost model;
+it does not attempt to schedule for a particular out-of-order window or reservation-station configuration.
+Those decisions belong to the machine scheduler, which runs after instruction selection and has access to
+detailed pipeline models.</p>
+<p><strong>Explicit software pipelining or prefetching</strong><br>Some architectures and some performance-sensitive code sequences rely on software pipelining or on explicit prefetch instructions. LLVM IR has no direct encoding of “this load should be issued two iterations early.” Loop transformations
+may create the conditions under which a later backend can software-pipeline, but the middle-end itself does not emit
+architecture-specific prefetch intrinsics unless a pass has been told (via TTI or target hooks) that they are profitable.</p>
+<p>In each case the IR and the middle-end provide a portable substrate. The features that differ most across micro-architectures are consulted late and through narrow interfaces, or are left entirely to the backend.</p>
+<h3 id="5-design-trade-offs"><a class="header" href="#5-design-trade-offs">5. Design Trade-offs</a></h3>
+<p>The middle-end’s refusal to know hardware details buys massive reuse: the same LoopVectorize pass, the same GVN,
+the same inliner, improve C, Rust, and Swift alike, and the resulting IR can be handed to any LLVM backend.</p>
+<p>The cost is that some optimization opportunities are left on the table until later stages, and a few must be handled
+by target-specific passes. A purely target-agnostic middle-end cannot, for example, know that a particular sequence
+will saturate a specific execution port on a particular CPU, nor can it know the exact misprediction penalty of a given
+branch.</p>
+<p>LLVM accepts this trade-off because the alternative—writing and maintaining separate optimization pipelines for every
+language and every major micro-architecture—reintroduces the N × M problem that Part 1 set out to solve.</p>
+<h3 id="6-the-abstraction-leaks"><a class="header" href="#6-the-abstraction-leaks">6. The Abstraction Leaks</a></h3>
+<p>The middle-end is only <em>mostly</em> target-independent. Three important leaks exist:</p>
+<ul>
+<li><strong>DataLayout</strong> — already present in the IR (Part 2). Alignment and pointer-size decisions affect many optimizations.</li>
+<li><strong>TargetLibraryInfo</strong> — tells the optimizer which library calls exist and what they mean (e.g., whether <code>memcpy</code> may be
+assumed, or whether a math function is available).</li>
+<li><strong>TargetTransformInfo</strong> — the primary channel for cost modeling. Vectorization, inlining heuristics, and some
+simplification decisions consult it.</li>
+</ul>
+<p>In addition, a few passes are allowed to behave differently when they know they are compiling for a particular target,
+and some language frontends inject target-aware attributes early. These leaks are intentional. They let the optimizer
+remain useful on real hardware without forcing every transformation to become target-specific.</p>
+<h3 id="7-source-tour"><a class="header" href="#7-source-tour">7. Source Tour</a></h3>
+<p>The middle-end lives primarily in three places:</p>
+<ul>
+<li><code>llvm/lib/Transforms/</code> — the transformations themselves (Scalar, Vectorize, IPO, Utils, \ldots)</li>
+<li><code>llvm/lib/Analysis/</code> — analyses that transformations query (LoopInfo, AliasAnalysis, ScalarEvolution, \ldots)</li>
+<li><code>llvm/lib/Passes/</code> — the New Pass Manager infrastructure and the pipelines that assemble analyses and
+transformations into <code>-O2</code>, <code>-O3</code>, etc.</li>
+</ul>
+<p>Target queries surface through headers in <code>llvm/include/llvm/Analysis/</code> (especially TargetTransformInfo) and are
+implemented by each backend.</p>
+<h3 id="8-looking-ahead"><a class="header" href="#8-looking-ahead">8. Looking Ahead</a></h3>
+<p>The middle-end can now improve IR without knowing the original language and without knowing most
+micro-architectural details. That IR, however, still describes an ideal machine: infinite registers,
+uniform instructions, and simple control flow.</p>
+<p>Real processors have finite registers, various types and operations, complex calling conventions,
+and idiosyncratic instruction encodings. The next engineering problem is therefore:</p>
+<p><strong>How does LLVM turn ideal IR instructions into legal machine instructions for many different ISAs without forcing the middle-end to know about those ISAs?</strong></p>
+<p>That problem forces the introduction of instruction selection and Machine IR — the subject of Part 4.</p>
+<h3 id="design-principle-3--optimize-against-a-simplified-model"><a class="header" href="#design-principle-3--optimize-against-a-simplified-model">Design Principle #3 — Optimize Against a Simplified Model</a></h3>
+<p>When many different hardware implementations must be supported, perform the bulk of optimization against a simplified, mostly hardware-agnostic model, and consult detailed target information only through narrow, explicit interfaces.</p>
+<p>LLVM IR erases finite registers, pipeline structure, branch-predictor behavior, and most memory-reordering details so that the same passes can serve many languages and many architectures. The few facts that must be known are obtained through DataLayout, TTI, and TLI. Everything else is deferred until the backend, where target-specific knowledge is unavoidable.</p>
+<h3 id="series-thread"><a class="header" href="#series-thread">Series Thread</a></h3>
+<p>Every abstraction in LLVM exists because the previous one could not adequately contain a particular form of complexity.</p>
+<ul>
+<li>The monolithic compiler could not solve the N × M problem → libraries (Part 1).</li>
+<li>ASTs and assembly could not serve as a shared medium → LLVM IR (Part 2).</li>
+<li>Language-specific or architecture-specific optimizers could not be reused → a middle-end that operates
+on a simplified, mostly target-independent model of the IR (Part 3).</li>
+</ul>
+<p>The next abstraction will confront the fact that this simplified model must eventually be reconciled with the
+messy reality of actual instruction sets.</p>
 <footer id="last-change">Last change: <time datetime="2026-08-14">2026-08-14</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/c3be0d5">c3be0d5</a></footer>
-<hr>
-<ol class="footnote-definition">
-<li id="footnote-1">
-<p>Joran Dirk Greef <a href="https://www.youtube.com/watch?v=yKgfk8lTQuE&amp;t=2793s&amp;pp=ygUZdGhlIHBvd2VyIG9mIGFuIGludGVyZmFjZQ%3D%3D">may disagree with me on this</a>. <a href="#fr-1-1">↩</a></p>
-</li>
-<li id="footnote-2">
-<p>One thing that is observable in hardware/sotware interface, any time one encounters a relatively radical idea, chances are a new functional unit is involved. <a href="#fr-2-1">↩</a></p>
-</li>
-</ol>
-
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../../book/llvm/intro.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../../book/llvm/phase-2.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                             </a>
 
-                            <a rel="next prefetch" href="../../book/llvm/phase-2.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="../../book/shorts.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                             </a>
 
@@ -402,11 +352,11 @@ or a research tool can be.</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../../book/llvm/intro.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../../book/llvm/phase-2.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
                     </a>
 
-                    <a rel="next prefetch" href="../../book/llvm/phase-2.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="../../book/shorts.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
                     </a>
             </nav>
