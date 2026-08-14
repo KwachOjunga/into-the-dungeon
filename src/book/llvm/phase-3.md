@@ -8,6 +8,8 @@ Parts 1 and 2 established two foundational abstractions. LLVM is organized as a 
 reusable libraries rather than a monolithic compiler, and LLVM IR serves as the stable contract 
 that lets many languages feed a single optimizer.
 
+> I hope it is clear by now what the IR is. It is just a data structure that eases the process of reorganizing code structure into what its equivalent hand-written assembly would look like. This means that ideally performing optimizations on the written code is not particularly expensive. In the next few sections, this will be illustrated, hopefully without bringing about much confusion. 
+
 A new question now arises.
 
 If the same IR is produced by frontends as different as Clang, Rustc, and the Swift compiler, why
@@ -183,7 +185,7 @@ micro-architectural details. That IR, however, still describes an ideal machine:
 uniform instructions, and simple control flow.
 
 
-Real processors have finite registers, illegal types and operations, complex calling conventions, 
+Real processors have finite registers, various types and operations, complex calling conventions, 
 and idiosyncratic instruction encodings. The next engineering problem is therefore:
 
 **How does LLVM turn ideal IR instructions into legal machine instructions for many different ISAs without forcing the middle-end to know about those ISAs?**

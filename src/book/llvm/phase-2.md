@@ -19,7 +19,7 @@ The central question of this article is therefore:
 
 **How can Clang, Rust, Swift, Zig, and many other languages all feed the same optimizer?**
 
-The answer is LLVM IR — not merely as a data format, but as a carefully engineered software contract.
+The answer is LLVM IR — a carefully engineered software contract.
 
 ### 2. The Limitation
 
