@@ -1,5 +1,5 @@
 Describing type theory from a beginner's perspective.
-We'll delve into as much of the math as is humanly possible and even as is undesirable.
+We'll delve into as much of the math as is humanly possible and undesirable.
 
 Specifically capture the applications of types in compiler theory and how it influences 
 the programming language design.
