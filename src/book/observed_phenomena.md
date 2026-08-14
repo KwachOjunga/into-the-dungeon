@@ -117,12 +117,9 @@ define i32 @add(i32 %0, i32 %1) {
 ```
 
 My previous assumption that llvm ir by definition neccessarily had an entry block has been shattered.
-In both instances there are defined unctions in the llvm output with none having an entry basic block.
+In both instances there are defined functions in the llvm output with none having an entry basic block.
 
 
-Secondly why exactly does the scf to cf conversion introduce uneccessary branching.
-Can the for loop construct be implemented using branching constructs. 
-And what exactly is happening in the second code snippet.
-
-
-
+Secondly why exactly does the scf to cf conversion introduce uneccessary branching?
+Can the for loop construct be implemented using branching constructs?
+And what exactly is happening in the second code snippet?
