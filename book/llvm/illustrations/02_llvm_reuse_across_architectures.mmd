@@ -1,0 +1,59 @@
+flowchart LR
+    subgraph LANG["Many Source Languages"]
+        C["C / C++"]
+        R["Rust"]
+        SW["Swift"]
+        GO["Other Languages"]
+    end
+
+    subgraph FE["Language-Specific Front-Ends"]
+        CF["Clang"]
+        RF["rustc"]
+        SF["Swift Front-End"]
+        GF["Other Front-Ends"]
+    end
+
+    IR["LLVM IR<br/>Stable Middle-End Contract"]
+
+    subgraph ME["LLVM Middle-End<br/>Reusable Across Targets"]
+        OPT["Optimization Passes"]
+        CFG["CFG / SSA Transformations"]
+        LOOP["Loop Optimizations"]
+        IPO["Interprocedural Optimizations"]
+    end
+
+    subgraph BE["Target-Specific Back-Ends"]
+        X86["x86"]
+        ARM["AArch64 / ARM"]
+        RISCV["RISC-V"]
+        GPU["GPU Targets"]
+    end
+
+    C --> CF
+    R --> RF
+    SW --> SF
+    GO --> GF
+
+    CF --> IR
+    RF --> IR
+    SF --> IR
+    GF --> IR
+
+    IR --> OPT --> CFG --> LOOP --> IPO
+
+    IPO --> X86
+    IPO --> ARM
+    IPO --> RISCV
+    IPO --> GPU
+
+    classDef lang fill:#f5f5f5,stroke:#666
+    classDef fe fill:#e8f1fa,stroke:#2563a8
+    classDef ir fill:#fff4cc,stroke:#c99a00,stroke-width:3px
+    classDef me fill:#eee6f7,stroke:#7040a0
+    classDef be fill:#e8f4e1,stroke:#4c8c2b
+
+    class C,R,SW,GO lang
+    class CF,RF,SF,GF fe
+    class IR ir
+    class OPT,CFG,LOOP,IPO me
+    class X86,ARM,RISCV,GPU be

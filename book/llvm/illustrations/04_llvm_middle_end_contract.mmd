@@ -1,0 +1,58 @@
+flowchart TD
+    SOURCES["Source Languages"]
+
+    subgraph FRONTENDS["Language Front-Ends"]
+        C["C / C++"]
+        R["Rust"]
+        SW["Swift"]
+    end
+
+    IR["LLVM IR<br/><br/>The Middle-End Contract"]
+
+    subgraph PASSES["Reusable Optimization Pipeline"]
+        direction TB
+        P1["Canonicalization"]
+        P2["Constant Folding / Propagation"]
+        P3["Inlining"]
+        P4["Dead Code Elimination"]
+        P5["Loop Optimizations"]
+        P6["Interprocedural Analysis"]
+        P7["Target-Aware Preparation"]
+
+        P1 --> P2 --> P3 --> P4 --> P5 --> P6 --> P7
+    end
+
+    subgraph TARGETS["Target Back-Ends"]
+        X["x86-64"]
+        A["AArch64"]
+        V["RISC-V"]
+        G["GPU"]
+    end
+
+    SOURCES --> C
+    SOURCES --> R
+    SOURCES --> SW
+
+    C --> IR
+    R --> IR
+    SW --> IR
+
+    IR --> P1
+    P7 --> X
+    P7 --> A
+    P7 --> V
+    P7 --> G
+
+    NOTE["Front-ends and back-ends vary.<br/>The optimization pipeline can be reused."]
+
+    IR -.-> NOTE
+
+    classDef source fill:#f5f5f5,stroke:#666
+    classDef ir fill:#fff4cc,stroke:#c99a00,stroke-width:3px
+    classDef pass fill:#eee6f7,stroke:#7040a0
+    classDef target fill:#e8f4e1,stroke:#4c8c2b
+
+    class SOURCES,C,R,SW source
+    class IR ir
+    class P1,P2,P3,P4,P5,P6,P7 pass
+    class X,A,V,G target

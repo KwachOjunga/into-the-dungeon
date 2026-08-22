@@ -1,0 +1,40 @@
+flowchart TD
+    SRC["Source Program"]
+
+    subgraph FE["Front-End — Analysis"]
+        LEX["Lexical Analysis"]
+        PARSE["Syntax Analysis"]
+        SEM["Semantic Analysis"]
+        IRGEN["Intermediate Code Generation"]
+        LEX --> PARSE --> SEM --> IRGEN
+    end
+
+    subgraph ME["Middle-End — Machine-Independent"]
+        OPT["Machine-Independent Optimization"]
+        TRANS["IR Transformations"]
+        OPT --> TRANS
+    end
+
+    subgraph BE["Back-End — Target-Dependent"]
+        ISel["Instruction Selection"]
+        MOPT["Machine-Dependent Optimization"]
+        CG["Code Generation"]
+        ISel --> MOPT --> CG
+    end
+
+    OUT["Target Program"]
+
+    SRC --> LEX
+    IRGEN --> OPT
+    TRANS --> ISel
+    CG --> OUT
+
+    classDef input fill:#fff4cc,stroke:#c99a00,stroke-width:2px
+    classDef fe fill:#e8f1fa,stroke:#2563a8
+    classDef me fill:#eee6f7,stroke:#7040a0
+    classDef be fill:#e8f4e1,stroke:#4c8c2b
+
+    class SRC,OUT input
+    class LEX,PARSE,SEM,IRGEN fe
+    class OPT,TRANS me
+    class ISel,MOPT,CG be
