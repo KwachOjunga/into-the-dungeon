@@ -1,0 +1,34 @@
+flowchart LR
+    subgraph TRAD["Traditional Compiler"]
+        S1["Source Language"]
+        F1["Front-End"]
+        I1["IR"]
+        M1["Middle-End"]
+        B1["Back-End"]
+        T1["Target"]
+
+        S1 --> F1 --> I1 --> M1 --> B1 --> T1
+    end
+
+    subgraph LLVM["LLVM Architecture"]
+        direction LR
+
+        LANG["Many Languages"]
+        FES["Many Front-Ends"]
+        CONTRACT["LLVM IR<br/>Common Contract"]
+        REUSE["Reusable Middle-End<br/>Optimization Pipeline"]
+        BES["Many Target Back-Ends"]
+        TARGETS["Many Architectures"]
+
+        LANG --> FES --> CONTRACT --> REUSE --> BES --> TARGETS
+    end
+
+    TRAD -.->|"Key limitation:<br/>optimizations and back-ends<br/>are harder to reuse"| LLVM
+
+    classDef traditional fill:#f5f5f5,stroke:#666
+    classDef contract fill:#fff4cc,stroke:#c99a00,stroke-width:3px
+    classDef reuse fill:#eee6f7,stroke:#7040a0,stroke-width:2px
+
+    class S1,F1,I1,M1,B1,T1 traditional
+    class CONTRACT contract
+    class REUSE reuse
