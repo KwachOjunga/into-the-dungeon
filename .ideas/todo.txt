@@ -29,3 +29,13 @@ Track the instances that are being overloaded and the number of payloads they ar
 and adjust the caches assgned accordingly.
 
 Currently. LLVM phases 2-7.
+
+
+# 23/08/2026
+
+- Research to evaluate the difference in performance between different
+    languages
+    that rely on llvm-ir and establish the differences in performance and
+    a rationale for why that is.
+    Establish the difference between a good optimisation and a bad one.
+-

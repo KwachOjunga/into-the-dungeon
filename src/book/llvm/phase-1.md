@@ -272,7 +272,7 @@ In Part 2, we will examine why abstract syntax trees are insufficient, why raw a
 
 ---
 
-## Design Principle #1 — Isolate variations
+## Design Principle #1 — Isolate variations to realise general abstractions
 
 > **When different parts of a system evolve for different reasons, separate them behind a stable interface.**[^2]
 >
