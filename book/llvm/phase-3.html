@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "rust";
             const default_dark_theme = "coal";
-            window.path_to_searchindex_js = "../../searchindex-e97d154b.js";
+            window.path_to_searchindex_js = "../../searchindex-3926ace1.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-3b507848.js"></script>
@@ -177,7 +177,12 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <p><strong>Inside LLVM: Engineering a Target-Independent Compiler</strong><br><strong>Part 3 — Reusing Optimizations Across Architectures</strong><br><strong>The Middle-End Contract</strong></p>
+                        <h1 id="inside-llvm-engineering-a-target-independent-compiler3"><a class="header" href="#inside-llvm-engineering-a-target-independent-compiler3"><strong>Inside LLVM: Engineering a Target-Independent Compiler(3)</strong></a></h1>
+<h2 id="part-3--reusing-optimizations-across-architectures"><a class="header" href="#part-3--reusing-optimizations-across-architectures"><strong>Part 3 — Reusing Optimizations Across Architectures</strong></a></h2>
+<h2 id="the-middle-end"><a class="header" href="#the-middle-end"><strong>The Middle-End</strong></a></h2>
+<a>
+<img src="../../../assets/phase-3.png" alt="Inside LLVM">
+<a />
 <h3 id="1-the-question"><a class="header" href="#1-the-question">1. The Question</a></h3>
 <p>Parts 1 and 2 established two foundational abstractions. LLVM is organized as a collection of
 reusable libraries rather than a monolithic compiler, and LLVM IR serves as the stable contract
@@ -189,7 +194,7 @@ that lets many languages feed a single optimizer.</p>
 <p>If the same IR is produced by frontends as different as Clang, Rustc, and the Swift compiler, why
 should the <em>same</em> sequence of optimizations improve all of them? More precisely:</p>
 <p><strong>Why can the same optimization improve programs written in completely different languages and still produce good code for completely different processors?</strong></p>
-<p>The answer lies in what the middle-end(the contract - LLVMIR) abstracts away.</p>
+<p>The answer lies in what the middle-end (the contract - LLVM IR) abstracts away.</p>
 <h3 id="2-the-limitation"><a class="header" href="#2-the-limitation">2. The Limitation</a></h3>
 <p>Once a program has been lowered to LLVM IR, a large collection of analyses and transformations
 become possible:
@@ -200,19 +205,19 @@ language or a particular micro-architecture, the reuse promised by Parts 1 and 2
 An inliner that understood Rust’s ownership semantics would be useless for C. A loop optimizer that
 hard-coded the characteristics of an Intel Golden Cove branch predictor would generate poor code
 for an ARM Neoverse core or a simple in-order RISC-V microcontroller.</p>
-<p>The middle-end therefore faces a new engineering pressure:</p>
-<p>It must improve code <em>without</em> knowing the source language that produced the IR and <em>without</em>
+<p>This therefore imposes a new engineerining hurdle:</p>
+<p>The IR has to be sufficiently composable to allow the middle-end to improve code <em>without</em> knowing the source language that produced the IR and <em>without</em>
 knowing most of the micro-architectural details of the processor that will eventually execute it.</p>
 <p>Traditional optimizers often failed this test. Many were deeply entangled with the frontend that fed them
-or with the backend they fed. The result was duplicated effort and optimizations that could not travel.</p>
+or with the backend they fed. The result was duplicated effort and optimizations that were not portable.</p>
 <h3 id="3-the-new-abstraction"><a class="header" href="#3-the-new-abstraction">3. The New Abstraction</a></h3>
-<p>LLVM’s response is the <strong>middle-end contract</strong>: a suite of analyses and transformations that operate almost
+<p>LLVM’s response is a suite of analyses and transformations that operate almost
 exclusively on the properties of LLVM IR itself, together with a narrow, carefully controlled set of target
 queries.</p>
 <p>The optimizer is allowed to rely on:</p>
 <ul>
-<li>the SSA property,</li>
-<li>the explicit control-flow graph,</li>
+<li>LLVM-IR SSA property,</li>
+<li>the explicit control-flow graph as exposed by <code>BasicBlocks</code> and <code>TerminatorInstructions</code>,</li>
 <li>the type system,</li>
 <li>the use-def chains,</li>
 <li>and a small number of target descriptors (DataLayout, TargetLibraryInfo, TargetTransformInfo).</li>
@@ -226,7 +231,7 @@ queries.</p>
 <li>or the existence of speculative execution with specific side effects.</li>
 </ul>
 <p>Assumptions that are implementation specific.</p>
-<p>By relying on a general infrastructure, the same pass can run on IR that originated in C, Rust,
+<p>By relying on a general infrastructure (LLVM-IR itself), the same pass can run on IR that originated in C, Rust,
 or Swift and later be lowered to x86-64, AArch64, or RISC-V.</p>
 <p>I think it is quite accurate to say that the IR explicitly refuses to rely on
 specific information unless it is absolutely neccessary.</p>
@@ -242,12 +247,11 @@ expensive results and keeps the pipeline composable.</p>
 <p><strong>Canonicalization</strong><br>Many passes exist solely to drive the IR toward a smaller set of preferred forms. InstCombine, SimplifyCFG,
 and related passes rewrite instruction sequences into canonical patterns so that later passes see less
 surface variation. Canonical forms are chosen because they are easier to reason about, not because they
-match any particular machine.</p>
+match any particular machine. They are equivalents of irreducible facts at the instruction level.</p>
 <p><strong>Controlled target queries</strong><br>When a pass truly needs hardware knowledge—most often for cost modeling—it consults TargetTransformInfo (TTI) or
 TargetLibraryInfo (TLI). Vectorizers ask TTI about legal vector widths and the relative cost of shuffles. The inliner
 may ask about call overhead. These queries are deliberate, narrow leaks; the great majority of transformations never
-make them. These are the abstraction leaks spokena about in the first phase of the series.</p>
-<p><strong>Add link to phase1 abstraction leaks</strong></p>
+make them. These are the abstraction leaks spoken of in the <a href="https://dev.to/kwachojunga/inside-llvm-engineering-a-target-independent-compiler1-30li/">first phase</a> of the series.</p>
 <h4 id="what-the-ir-abstracts-away"><a class="header" href="#what-the-ir-abstracts-away">What the IR Abstracts Away</a></h4>
 <p>LLVM IR presents a simplified model of execution that deliberately erases many hardware realities:</p>
 <ul>
@@ -276,7 +280,7 @@ and TTI cost models, but it does not try to model predictor state. The final dec
 branch versus conditional move is left to the backend, where target-specific knowledge is available.</p>
 <p><strong>Instruction reordering and out-of-order execution</strong><br>Out-of-order cores (most modern x86 and high-end ARM designs) dynamically reorder independent instructions to
 hide latency. In-order cores (many embedded RISC-V implementations, older ARM cores) do not.
-The middle-end performs <em>static</em> reordering only when it is profitable under a simplified cost model; #<strong>verify this</strong>
+The middle-end performs <em>static</em> reordering only when it is profitable under a simplified cost model;
 it does not attempt to schedule for a particular out-of-order window or reservation-station
 configuration. Those decisions belong to the machine scheduler, which runs after instruction
 selection and has access to detailed pipeline models.</p>
@@ -284,21 +288,21 @@ selection and has access to detailed pipeline models.</p>
 on explicit prefetch instructions. LLVM IR has no direct encoding of “this load should be issued
 two iterations early.” Loop transformations may create the conditions under which a later backend
 can software-pipeline, but the middle-end itself does not emit architecture-specific prefetch
-intrinsics unless a pass has been told (via TTI or target hooks) that they are profitable.
-#<strong>illustrate this or at least give an example</strong></p>
-<p>In each case the IR and the middle-end provide a portable substrate. The features that differ most
-across micro-architectures are consulted late and through narrow interfaces, or are left entirely
+intrinsics unless a pass has been told (via TTI or target hooks) that they are profitable.</p>
+<p>In each case the IR and the middle-end provide a portable substrate. Such features that differ most
+across micro-architectures are relegated to later stages and often accessed through narrow interfaces, or are left entirely
 to the backend.</p>
 <h3 id="5-design-trade-offs"><a class="header" href="#5-design-trade-offs">5. Design Trade-offs</a></h3>
 <p>This abstraction of hardware details buys massive reuse: the same LoopVectorize pass, the same GVN,
 the same inliner, improve C, Rust, and Swift alike, and the resulting IR can be handed to any LLVM
-backend.</p>
-<p>The cost is that some optimization opportunities are left on the table until later stages,
+backend. Even extensive polyhedral optimizations that improve data locality exposing pockets of parrallelism
+become possible for a whole set of architectures.</p>
+<p>Obviously, the cost is that some optimization opportunities are left on the table until later stages,
 and a few must be handled by target-specific passes. A purely target-agnostic middle-end cannot,
 for example, know that a particular sequence will saturate a specific execution port on a
 particular CPU, nor can it know the exact misprediction penalty of a given branch.</p>
 <p>LLVM accepts this trade-off because the alternative—writing and maintaining separate optimization pipelines for every
-language and every major micro-architecture—reintroduces the N × M problem that Part 1 set out to solve.</p>
+language and every major micro-architecture re-introduces the N × M problem that Part 1 set out to describe.</p>
 <h3 id="6-the-abstraction-leaks"><a class="header" href="#6-the-abstraction-leaks">6. The Abstraction Leaks</a></h3>
 <p>The middle-end is only <em>mostly</em> target-independent. Three important leaks exist:</p>
 <ul>
@@ -323,7 +327,7 @@ transformations into <code>-O2</code>, <code>-O3</code>, etc.</li>
 implemented by each backend.</p>
 <h3 id="8-looking-ahead"><a class="header" href="#8-looking-ahead">8. Looking Ahead</a></h3>
 <p>The middle-end can now improve IR without knowing the original language and without knowing most
-micro-architectural details. That IR, however, still describes an ideal machine: infinite
+micro-architectural details. The IR, however, still describes an ideal machine: infinite
 registers, uniform instructions, and simple control flow.</p>
 <p>Real processors have finite registers, various specific types and operations, complex
 calling conventions, and idiosyncratic instruction encodings. The next engineering problem is
@@ -348,7 +352,7 @@ on a simplified, mostly target-independent model of the IR (Part 3).</li>
 </ul>
 <p>The next abstraction will confront the fact that this simplified model must eventually be
 reconciled with the chaotic reality of actual instruction sets.</p>
-<footer id="last-change">Last change: <time datetime="2026-08-24">2026-08-24</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/b7088ab">b7088ab</a></footer>
+<footer id="last-change">Last change: <time datetime="2026-08-24">2026-08-24</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/62af78e">62af78e</a></footer></a>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
