@@ -13,19 +13,37 @@ Draft for discussion
 
 ## 1. Executive Summary
 
-Spade is a modern, strongly typed hardware description language with explicit support for hardware-oriented abstractions such as entities, pipelines, latency, and strongly typed bit-level operations. Its compiler currently lowers Spade programs to SystemVerilog, providing a practical and effective implementation path.
+Spade is a modern, strongly typed hardware description language with explicit
+support for hardware-oriented abstractions such as entities, pipelines, latency,
+and strongly typed bit-level operations. Its compiler currently lowers Spade
+programs to SystemVerilog, providing a practical and effective implementation
+path.
 
-However, as hardware compiler infrastructure grows, there is an opportunity to introduce a reusable hardware-oriented intermediate representation between the Spade compiler and RTL emission.
+## NOTE: (Describe this process briefly as described by the authors and the fundamentally the source.)
 
-This proposal introduces **Pliron-HW**, a Rust-native, multi-level hardware IR stack built on Pliron and initially designed as a backend for Spade.
+However, as hardware compiler infrastructure grows, there is an opportunity to
+introduce a reusable hardware-oriented intermediate representation between the
+Spade compiler and RTL emission.
 
-The project is inspired by the architectural approach demonstrated by CIRCT: hardware compilation benefits from separating structural hardware, combinational logic, sequential state, pipeline structure, and output-language constructs into distinct but interoperable IR levels. CIRCT currently provides this separation through dialects including `hw`, `comb`, `seq`, `sv`, and `pipeline`.
+This proposal introduces **Pliron-HW**, a Rust-native, multi-level hardware IR stack built on Pliron and designed with Spade in mind.
 
-Pliron-HW would investigate whether the same general architectural approach can be implemented effectively in a Rust-native compiler infrastructure and integrated directly with a Rust-based HDL such as Spade.
+The project is inspired by the architectural approach demonstrated by CIRCT: 
+hardware compilation benefits from separating structural hardware, combinational
+logic, sequential state, pipeline structure, and output-language constructs into 
+distinct but interoperable IR levels. CIRCT currently provides this separation 
+through dialects including `hw`, `comb`, `seq`, `sv`, and `pipeline`.
 
-The immediate objective is **not to reproduce CIRCT or replace it**. The objective is to establish a focused, reusable hardware compiler middle-end for Spade, while creating an IR that can eventually be targeted by other Rust-based hardware tools.
+Pliron-HW would investigate whether the same general architectural approach can
+be implemented effectively in a Rust-native compiler infrastructure and
+integrated directly with a Rust-based HDL such as Spade.
 
----
+The immediate objective is **not to reproduce CIRCT or replace it**. The
+objective is to establish a focused, reusable hardware compiler middle-end for
+Spade, while creating an IR that can eventually be targeted by other Rust-based
+hardware tools.
+
+## NOTE: Elaborate on the utility of certain software tools ie. lsps, analyzer etc on the hardware ecosystem.
+
 
 ## 2. Motivation
 
@@ -64,31 +82,7 @@ The resulting IR could also provide a common target for future hardware generato
 
 ---
 
-## 3. Why Pliron?
-
-Pliron is an extensible compiler IR framework implemented in Rust and inspired by MLIR. Its infrastructure provides operations, types, attributes, regions, analyses, verification, parsing, and related compiler IR facilities.
-
-Recent projects such as NVIDIA's cuda-oxide demonstrate that Pliron can participate in a substantial Rust-native compiler pipeline.
-
-The relevant architectural model is:
-
-```mermaid
-flowchart LR
-    A["Rust"] --> B["MIR"]
-    B --> C["Pliron"]
-    C --> D["LLVM IR"]
-    D --> E["PTX"]
-```
-
-cuda-oxide is currently an experimental/early-alpha project, so it should not be treated as evidence of production maturity. Nevertheless, it demonstrates a relevant use case for Pliron as a Rust-native intermediate representation.
-
-Pliron is therefore a promising substrate for investigating a hardware IR without introducing the C++/MLIR dependency stack into the Spade compiler.
-
-The proposal is consequently not based on the claim that Pliron should replace CIRCT. Rather, it asks whether the **multi-level hardware IR model demonstrated by MLIR/CIRCT can be adapted effectively to a Rust-native compiler ecosystem.**
-
----
-
-## 4. Goals
+## 3. Goals
 
 ### Primary Goal
 
@@ -112,7 +106,7 @@ This phase will not attempt to:
 
 * replace the Spade language;
 * replace Spade's type checker or frontend;
-* achieve CIRCT feature parity;
+* achieve CIRCT feature parity (only selective dialects that are found to be relevant will be implemented);
 * implement a complete HLS framework;
 * implement physical-design optimization;
 * implement a complete formal-verification stack;
@@ -120,46 +114,33 @@ This phase will not attempt to:
 
 ---
 
-## 5. Architectural Model
+## 4. Why Pliron?
 
-The proposed architecture is:
+Pliron is an extensible compiler IR framework implemented in Rust and inspired by MLIR. Its infrastructure provides
+operations, types, attributes, regions, analyses, verification, parsing, and related compiler IR facilities.
+It also defines a clear abstraction for dialects that allows for definition of various lowering schemes between
+operations.
+
+Recent projects such as NVIDIA's cuda-oxide demonstrate that Pliron can participate in a substantial Rust-native compiler pipeline.
+
+The relevant architectural model is:
 
 ```mermaid
-flowchart TD
-    A["Spade"] --> B["Spade Semantic IR"]
-    B --> C["Spade → Pliron-HW Lowering"]
-
-    C --> D["Pliron-HW"]
-
-    subgraph HW["Pliron-HW"]
-        D1["hw<br/>Structural Hardware"]
-        D2["comb<br/>Combinational Logic"]
-        D3["seq<br/>Sequential Hardware"]
-        D4["pipeline<br/>Pipeline / Latency"]
-    end
-
-    D --> D1
-    D --> D2
-    D --> D3
-    D --> D4
-
-    D1 --> E["Hardware Optimization"]
-    D2 --> E
-    D3 --> E
-    D4 --> E
-
-    E --> F["SV Legalization / Lowering"]
-    F --> G["SystemVerilog Emission"]
-
-    G --> H["Verilator"]
-    G --> I["Yosys"]
+flowchart LR
+    A["Rust"] --> B["MIR"]
+    B --> C["Pliron"]
+    C --> D["LLVM IR"]
+    D --> E["PTX"]
 ```
 
-The important design principle is that **SystemVerilog is an output representation, not the primary hardware optimization IR**.
+cuda-oxide is currently an experimental/early-alpha project, so it should not be treated as evidence of production maturity. Nevertheless, it demonstrates a relevant use case for Pliron as a Rust-native intermediate representation.
 
-The core hardware representation should remain independent of SystemVerilog wherever practical.
+Pliron is therefore a promising substrate for investigating a hardware IR without introducing the C++/MLIR dependency stack into the Spade compiler.
+
+The proposal is consequently not based on the claim that Pliron should replace CIRCT. Rather, it asks whether the **multi-level hardware IR model demonstrated by MLIR/CIRCT can be adapted effectively to a Rust-native compiler ecosystem.**
 
 ---
+
 
 ## 6. Proposed Dialect Stack
 
@@ -257,7 +238,12 @@ flowchart LR
 
 ## 7. Semantic Contract
 
-Before substantial optimization work begins, Pliron-HW should specify the semantics of its core types and operations.
+Before substantial optimization work begins, Pliron-HW should specify the semantics of 
+its core types and operations. Part of this task is done since much of what lies in the core is 
+largely abstracted by mlir core. 
+
+But since this is to be designed as something that should first integrate with Spade, the
+specification between how Spade should integrate with `pliron-hw` has to be designed.
 
 The specification should cover:
 
@@ -278,7 +264,9 @@ The specification should cover:
 * memory semantics;
 * hierarchy and instance semantics.
 
-This semantic contract is a prerequisite for reliable lowering from Spade and for allowing independent frontends to target Pliron-HW.
+This semantic contract is a prerequisite for reliable lowering from Spade and for 
+abstracting general infrastructure that is to make up the `pliron-hw`
+allowing independent frontends to target it.
 
 ---
 
@@ -348,36 +336,6 @@ flowchart TD
 ```
 
 This provides a reference implementation against which the new backend can be validated.
-
----
-
-## 9. Backend Integration with Swim
-
-The new backend should initially be exposed as an experimental compiler option rather than changing the default backend.
-
-For example:
-
-```text
-spadec --backend=pliron-hw
-```
-
-or an equivalent Swim configuration.
-
-The existing Swim flow should remain unchanged:
-
-```mermaid
-flowchart TD
-    A["swim build"] --> B["Spade Compiler"]
-    B --> C["SystemVerilog"]
-
-    C --> D["swim test"]
-    C --> E["swim synth"]
-    C --> F["swim pnr"]
-```
-
-The only change should be which compiler backend generates the SystemVerilog.
-
-This provides a low-risk migration path and allows direct comparison between the existing and Pliron-HW backends.
 
 ---
 
@@ -476,38 +434,7 @@ Representative examples should include:
 
 ---
 
-## 12. Repository Structure
-
-A possible initial repository layout is:
-
-```text
-pliron-hw/
-├── crates/
-│   ├── pliron-hw/
-│   ├── pliron-hw-comb/
-│   ├── pliron-hw-seq/
-│   ├── pliron-hw-pipeline/
-│   └── pliron-hw-sv/
-│
-├── spade-bridge/
-├── tools/
-│   └── hw-opt/
-│
-├── tests/
-│   ├── parser/
-│   ├── verifier/
-│   ├── lowering/
-│   ├── optimization/
-│   └── end-to-end/
-│
-└── examples/
-```
-
-The exact repository boundaries should be decided with the Pliron and Spade maintainers after the initial prototype.
-
----
-
-## 13. Milestones
+## 12. Milestones
 
 ### M0 — Vertical Prototype
 
@@ -589,7 +516,8 @@ Implement:
 * mux simplification;
 * hardware-specific analyses.
 
-**Exit criterion:** optimized generated RTL is demonstrably equivalent to the unoptimized representation and does not regress synthesis quality.
+**Exit criterion:** optimized generated RTL is demonstrably equivalent to the unoptimized 
+representation and does not regress synthesis quality.
 
 ---
 
@@ -625,6 +553,7 @@ Deliver:
 * public experimental release.
 
 ---
+
 
 ## 14. Success Criteria
 
@@ -744,7 +673,8 @@ These should be introduced only when a concrete frontend or transformation requi
 7. Compare the generated RTL against the existing Spade backend.
 8. Use the results of this prototype to finalize the dialect and repository architecture.
 
-The first milestone should therefore be treated as an architectural experiment rather than a commitment to a complete hardware compiler framework.
+The first milestone should therefore be treated as an architectural experiment rather than a commitment 
+to a complete hardware compiler framework.
 
 ---
 
@@ -752,11 +682,16 @@ The first milestone should therefore be treated as an architectural experiment r
 
 Pliron-HW proposes a focused investigation into a Rust-native multi-level hardware compiler architecture.
 
-The immediate value is a maintainable alternative backend for Spade. The larger value is the possibility of separating hardware semantics and optimization from both the Spade language and the final RTL representation.
+The immediate value is a maintainable alternative backend for Spade. The larger value is the possibility 
+of separating hardware semantics and optimization from both the Spade language and the final RTL 
+representation.
 
-CIRCT demonstrates the effectiveness of this architectural separation at scale. Pliron provides an opportunity to explore a similar model within a Rust-native compiler ecosystem.
+CIRCT demonstrates the effectiveness of this architectural separation at scale. Pliron provides an 
+opportunity to explore a similar model within a Rust-native compiler ecosystem.
 
-The proposed approach deliberately avoids attempting to reproduce CIRCT. Instead, it starts with the smallest useful hardware IR stack, validates it through an end-to-end Spade backend, and expands only where real compiler requirements justify additional abstraction.
+The proposed approach deliberately avoids attempting to reproduce CIRCT. Instead, it starts with the 
+smallest useful hardware IR stack, validates it through an end-to-end Spade backend, and expands only 
+where real compiler requirements justify additional abstraction.
 
 The first question is therefore not:
 
@@ -767,4 +702,3 @@ It is:
 > **"Can a small, well-defined hardware middle-end built on Pliron provide Spade with a cleaner separation between language semantics, hardware optimization, and RTL generation?"**
 
 This proposal argues that the question is both technically feasible and worth investigating.
-
