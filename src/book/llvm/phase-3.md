@@ -1,6 +1,11 @@
-**Inside LLVM: Engineering a Target-Independent Compiler**  
-**Part 3 — Reusing Optimizations Across Architectures**  
-**The Middle-End**
+# **Inside LLVM: Engineering a Target-Independent Compiler(3)**  
+## **Part 3 — Reusing Optimizations Across Architectures**  
+## **The Middle-End**
+
+<a>
+<img src="../../../assets/phase-3.png" alt="Inside LLVM">
+<a/>
+
 
 ### 1. The Question
 
@@ -130,7 +135,7 @@ branch versus conditional move is left to the backend, where target-specific kno
 **Instruction reordering and out-of-order execution**  
 Out-of-order cores (most modern x86 and high-end ARM designs) dynamically reorder independent instructions to 
 hide latency. In-order cores (many embedded RISC-V implementations, older ARM cores) do not. 
-The middle-end performs *static* reordering only when it is profitable under a simplified cost model; #**verify this**
+The middle-end performs *static* reordering only when it is profitable under a simplified cost model; 
 it does not attempt to schedule for a particular out-of-order window or reservation-station
 configuration. Those decisions belong to the machine scheduler, which runs after instruction
 selection and has access to detailed pipeline models.
@@ -141,7 +146,6 @@ on explicit prefetch instructions. LLVM IR has no direct encoding of “this loa
 two iterations early.” Loop transformations may create the conditions under which a later backend
 can software-pipeline, but the middle-end itself does not emit architecture-specific prefetch
 intrinsics unless a pass has been told (via TTI or target hooks) that they are profitable.
-#**illustrate this or at least give an example**
 
 In each case the IR and the middle-end provide a portable substrate. Such features that differ most
 across micro-architectures are relegated to later stages and often accessed through narrow interfaces, or are left entirely
@@ -191,7 +195,7 @@ implemented by each backend.
 ### 8. Looking Ahead
 
 The middle-end can now improve IR without knowing the original language and without knowing most 
-micro-architectural details. That IR, however, still describes an ideal machine: infinite 
+micro-architectural details. The IR, however, still describes an ideal machine: infinite 
 registers, uniform instructions, and simple control flow.
 
 Real processors have finite registers, various specific types and operations, complex 
