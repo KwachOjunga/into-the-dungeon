@@ -3,7 +3,7 @@
 ## **The Middle-End**
 
 
-<img src="../../../assets/phase-3.png" alt="Inside LLVM">
+<img src="../../assets/phase-3.png" alt="Inside LLVM">
 
 
 
