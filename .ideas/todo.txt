@@ -38,4 +38,11 @@ Currently. LLVM phases 2-7.
     that rely on llvm-ir and establish the differences in performance and
     a rationale for why that is.
     Establish the difference between a good optimisation and a bad one.
--
+- Cache architectures and their implementations
+
+
+# 24/08/2026
+
+- Write about Polly.
+    - Its architecture, what it relies on. The structure of llvm that makes it possible
+        and the math that powers it.
