@@ -1,6 +1,6 @@
 **Inside LLVM: Engineering a Target-Independent Compiler**  
 **Part 3 — Reusing Optimizations Across Architectures**  
-**The Middle-End Contract**
+**The Middle-End**
 
 ### 1. The Question
 
@@ -17,7 +17,7 @@ should the *same* sequence of optimizations improve all of them? More precisely:
 
 **Why can the same optimization improve programs written in completely different languages and still produce good code for completely different processors?**
 
-The answer lies in what the middle-end(the contract - LLVMIR) abstracts away.
+The answer lies in what the middle-end (the contract - LLVM IR) abstracts away.
 
 ### 2. The Limitation
 
@@ -32,24 +32,24 @@ An inliner that understood Rust’s ownership semantics would be useless for C. 
 hard-coded the characteristics of an Intel Golden Cove branch predictor would generate poor code 
 for an ARM Neoverse core or a simple in-order RISC-V microcontroller.
 
-The middle-end therefore faces a new engineering pressure:
+This therefore imposes a new engineerining hurdle:
 
-It must improve code *without* knowing the source language that produced the IR and *without* 
+The IR has to be sufficiently composable to allow the middle-end to improve code *without* knowing the source language that produced the IR and *without* 
 knowing most of the micro-architectural details of the processor that will eventually execute it.
 
 Traditional optimizers often failed this test. Many were deeply entangled with the frontend that fed them 
-or with the backend they fed. The result was duplicated effort and optimizations that could not travel.
+or with the backend they fed. The result was duplicated effort and optimizations that were not portable.
 
 ### 3. The New Abstraction
 
-LLVM’s response is the **middle-end contract**: a suite of analyses and transformations that operate almost 
+LLVM’s response is a suite of analyses and transformations that operate almost 
 exclusively on the properties of LLVM IR itself, together with a narrow, carefully controlled set of target 
 queries.
 
 The optimizer is allowed to rely on:
 
-- the SSA property,
-- the explicit control-flow graph,
+- LLVM-IR SSA property,
+- the explicit control-flow graph as exposed by `BasicBlocks` and `TerminatorInstructions`, 
 - the type system,
 - the use-def chains,
 - and a small number of target descriptors (DataLayout, TargetLibraryInfo, TargetTransformInfo).
@@ -64,7 +64,7 @@ It is *not* allowed to assume:
 
 Assumptions that are implementation specific.
 
-By relying on a general infrastructure, the same pass can run on IR that originated in C, Rust,
+By relying on a general infrastructure (LLVM-IR itself), the same pass can run on IR that originated in C, Rust,
 or Swift and later be lowered to x86-64, AArch64, or RISC-V.
 
 I think it is quite accurate to say that the IR explicitly refuses to rely on 
@@ -87,15 +87,14 @@ Two further design decisions keep the middle-end largely target-independent.
 Many passes exist solely to drive the IR toward a smaller set of preferred forms. InstCombine, SimplifyCFG, 
 and related passes rewrite instruction sequences into canonical patterns so that later passes see less 
 surface variation. Canonical forms are chosen because they are easier to reason about, not because they 
-match any particular machine.
+match any particular machine. They are equivalents of irreducible facts at the instruction level.
 
 **Controlled target queries**  
 When a pass truly needs hardware knowledge—most often for cost modeling—it consults TargetTransformInfo (TTI) or
 TargetLibraryInfo (TLI). Vectorizers ask TTI about legal vector widths and the relative cost of shuffles. The inliner 
 may ask about call overhead. These queries are deliberate, narrow leaks; the great majority of transformations never 
-make them. These are the abstraction leaks spokena about in the first phase of the series.
+make them. These are the abstraction leaks spoken of in the [first phase](https://dev.to/kwachojunga/inside-llvm-engineering-a-target-independent-compiler1-30li/) of the series.
 
-**Add link to phase1 abstraction leaks**
 
 #### What the IR Abstracts Away
 
@@ -144,23 +143,24 @@ can software-pipeline, but the middle-end itself does not emit architecture-spec
 intrinsics unless a pass has been told (via TTI or target hooks) that they are profitable.
 #**illustrate this or at least give an example**
 
-In each case the IR and the middle-end provide a portable substrate. The features that differ most
-across micro-architectures are consulted late and through narrow interfaces, or are left entirely
+In each case the IR and the middle-end provide a portable substrate. Such features that differ most
+across micro-architectures are relegated to later stages and often accessed through narrow interfaces, or are left entirely
 to the backend.
 
 ### 5. Design Trade-offs
 
 This abstraction of hardware details buys massive reuse: the same LoopVectorize pass, the same GVN, 
 the same inliner, improve C, Rust, and Swift alike, and the resulting IR can be handed to any LLVM
-backend.
+backend. Even extensive polyhedral optimizations that improve data locality exposing pockets of parrallelism
+become possible for a whole set of architectures.
 
-The cost is that some optimization opportunities are left on the table until later stages,
+Obviously, the cost is that some optimization opportunities are left on the table until later stages,
 and a few must be handled by target-specific passes. A purely target-agnostic middle-end cannot,
 for example, know that a particular sequence will saturate a specific execution port on a
 particular CPU, nor can it know the exact misprediction penalty of a given branch.
 
 LLVM accepts this trade-off because the alternative—writing and maintaining separate optimization pipelines for every
-language and every major micro-architecture—reintroduces the N × M problem that Part 1 set out to solve.
+language and every major micro-architecture re-introduces the N × M problem that Part 1 set out to describe.
 
 ### 6. The Abstraction Leaks
 
