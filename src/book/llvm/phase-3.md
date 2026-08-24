@@ -2,9 +2,9 @@
 ## **Part 3 — Reusing Optimizations Across Architectures**  
 ## **The Middle-End**
 
-<a>
+
 <img src="../../../assets/phase-3.png" alt="Inside LLVM">
-<a/>
+
 
 
 ### 1. The Question

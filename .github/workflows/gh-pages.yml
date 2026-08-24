@@ -11,20 +11,20 @@ jobs:
         runs-on: ubuntu-latest
         concurrency:
             group: ${{ github.workflow }}-${{ github.ref }}
+        env:
+            MDBOOK_VERSION: 0.5.3
         steps:
             - uses: actions/checkout@v2
 
-            - name: Install mdbook-last-changed preprocessor
-              run: cargo install mdbook-last-changed --locked
+            - name: Install mdbook, mdbook-mermaid, mdbook-last-changed preprocessor
+              run: |
+                  wget -qO- https://github.com/rust-lang/mdBook/releases/download/v${MDBOOK_VERSION}/mdbook-v${MDBOOK_VERSION}-x86_64-unknown-linux-musl.tar.gz | tar -xz
+                  wget -qO- https://github.com/badboy/mdbook-mermaid/releases/download/v0.17.1/mdbook-mermaid-v0.17.1-x86_64-unknown-linux-musl.tar.gz | tar -xz
+                  wget -qO- https://github.com/badboy/mdbook-last-changed/releases/download/v0.4.0/mdbook-last-changed-v0.4.0-x86_64-unknown-linux-musl.tar.gz | tar -xz
+                  echo "$PWD" >> $GITHUB_PATH
 
             - name: Install mdbook-gitinfo preprocessor
               run: cargo install mdbook-gitinfo --locked
-
-            - name: Install mdbook-typst-math preprocessor
-              run: cargo install mdbook-typst-math --locked
-
-            - name: Install mdbook-mermaid preprocessor
-              run: cargo install mdbook-mermaid --locked
 
             - name: Setup mdBook
               uses: peaceiris/actions-mdbook@v2
