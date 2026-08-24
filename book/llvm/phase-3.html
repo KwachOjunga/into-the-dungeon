@@ -35,7 +35,7 @@
             const path_to_root = "../../";
             const default_light_theme = "rust";
             const default_dark_theme = "coal";
-            window.path_to_searchindex_js = "../../searchindex-c1c1932c.js";
+            window.path_to_searchindex_js = "../../searchindex-e97d154b.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-3b507848.js"></script>
@@ -189,7 +189,7 @@ that lets many languages feed a single optimizer.</p>
 <p>If the same IR is produced by frontends as different as Clang, Rustc, and the Swift compiler, why
 should the <em>same</em> sequence of optimizations improve all of them? More precisely:</p>
 <p><strong>Why can the same optimization improve programs written in completely different languages and still produce good code for completely different processors?</strong></p>
-<p>The answer lies in what the middle-end(the contract - LLVMIR) deliberately refuses to know.</p>
+<p>The answer lies in what the middle-end(the contract - LLVMIR) abstracts away.</p>
 <h3 id="2-the-limitation"><a class="header" href="#2-the-limitation">2. The Limitation</a></h3>
 <p>Once a program has been lowered to LLVM IR, a large collection of analyses and transformations
 become possible:
@@ -226,14 +226,15 @@ queries.</p>
 <li>or the existence of speculative execution with specific side effects.</li>
 </ul>
 <p>Assumptions that are implementation specific.</p>
-<p>By refusing to know these facts, the same pass can run on IR that originated in C, Rust,
+<p>By relying on a general infrastructure, the same pass can run on IR that originated in C, Rust,
 or Swift and later be lowered to x86-64, AArch64, or RISC-V.</p>
 <p>I think it is quite accurate to say that the IR explicitly refuses to rely on
 specific information unless it is absolutely neccessary.</p>
 <h3 id="4-how-it-works"><a class="header" href="#4-how-it-works">4. How It Works</a></h3>
 <p>The middle-end is organized as a pipeline of <strong>passes</strong>. Each pass is either an analysis
 (computing information such as dominator trees, loop nests, or alias sets) or a transformation
-(rewriting the IR while preserving semantics).</p>
+(rewriting the IR while preserving semantics). These are source to source transformations.
+They modify LLVM-IR.</p>
 <p>Modern LLVM uses the New Pass Manager. Analyses are requested on demand and cached; transformations
 declare which analyses they preserve or invalidate. This machinery lets the compiler avoid recomputing
 expensive results and keeps the pipeline composable.</p>
@@ -245,7 +246,8 @@ match any particular machine.</p>
 <p><strong>Controlled target queries</strong><br>When a pass truly needs hardware knowledge—most often for cost modeling—it consults TargetTransformInfo (TTI) or
 TargetLibraryInfo (TLI). Vectorizers ask TTI about legal vector widths and the relative cost of shuffles. The inliner
 may ask about call overhead. These queries are deliberate, narrow leaks; the great majority of transformations never
-make them.</p>
+make them. These are the abstraction leaks spokena about in the first phase of the series.</p>
+<p><strong>Add link to phase1 abstraction leaks</strong></p>
 <h4 id="what-the-ir-abstracts-away"><a class="header" href="#what-the-ir-abstracts-away">What the IR Abstracts Away</a></h4>
 <p>LLVM IR presents a simplified model of execution that deliberately erases many hardware realities:</p>
 <ul>
@@ -264,30 +266,37 @@ for this information.</li>
 <h4 id="concrete-architectural-differences-the-middle-end-mostly-ignores"><a class="header" href="#concrete-architectural-differences-the-middle-end-mostly-ignores">Concrete Architectural Differences the Middle-End Mostly Ignores</a></h4>
 <p>Consider three capabilities that hardware exposes to varying degrees and that aggressive programmers
 sometimes exploit directly.</p>
-<p><strong>Branch prediction and speculative execution</strong><br>High-performance x86 and ARM cores invest heavily in predictors and execute far beyond unresolved branches.
-A misprediction is expensive, so the shape of control flow matters. Some code bases are hand-tuned to make
-branches more predictable or to use conditional moves to avoid them. LLVM IR has no first-class notion of
-“this branch is highly predictable” or “this value was produced by speculation.” The middle-end may convert
-branches into selects (or vice versa) based on simple heuristics and TTI cost models, but it does not try to
-model predictor state. The final decision about branch versus conditional move is left to the backend, where
-target-specific knowledge is available.</p>
+<p><strong>Branch prediction and speculative execution</strong><br>High-performance x86 and ARM cores invest heavily in predictors and execute far beyond
+unresolved branches.
+A misprediction is expensive, so the shape of control flow matters. Some code bases
+are hand-tuned to make branches more predictable or to use conditional moves to avoid them.
+LLVM IR has no first-class notion of “this branch is highly predictable” or “this value was produced by speculation.”
+The middle-end may convert branches into selects (or vice versa) based on simple heuristics
+and TTI cost models, but it does not try to model predictor state. The final decision about
+branch versus conditional move is left to the backend, where target-specific knowledge is available.</p>
 <p><strong>Instruction reordering and out-of-order execution</strong><br>Out-of-order cores (most modern x86 and high-end ARM designs) dynamically reorder independent instructions to
 hide latency. In-order cores (many embedded RISC-V implementations, older ARM cores) do not.
-The middle-end performs <em>static</em> reordering only when it is profitable under a simplified cost model;
-it does not attempt to schedule for a particular out-of-order window or reservation-station configuration.
-Those decisions belong to the machine scheduler, which runs after instruction selection and has access to
-detailed pipeline models.</p>
-<p><strong>Explicit software pipelining or prefetching</strong><br>Some architectures and some performance-sensitive code sequences rely on software pipelining or on explicit prefetch instructions. LLVM IR has no direct encoding of “this load should be issued two iterations early.” Loop transformations
-may create the conditions under which a later backend can software-pipeline, but the middle-end itself does not emit
-architecture-specific prefetch intrinsics unless a pass has been told (via TTI or target hooks) that they are profitable.</p>
-<p>In each case the IR and the middle-end provide a portable substrate. The features that differ most across micro-architectures are consulted late and through narrow interfaces, or are left entirely to the backend.</p>
+The middle-end performs <em>static</em> reordering only when it is profitable under a simplified cost model; #<strong>verify this</strong>
+it does not attempt to schedule for a particular out-of-order window or reservation-station
+configuration. Those decisions belong to the machine scheduler, which runs after instruction
+selection and has access to detailed pipeline models.</p>
+<p><strong>Explicit software pipelining or prefetching</strong><br>Some architectures and some performance-sensitive code sequences rely on software pipelining or
+on explicit prefetch instructions. LLVM IR has no direct encoding of “this load should be issued
+two iterations early.” Loop transformations may create the conditions under which a later backend
+can software-pipeline, but the middle-end itself does not emit architecture-specific prefetch
+intrinsics unless a pass has been told (via TTI or target hooks) that they are profitable.
+#<strong>illustrate this or at least give an example</strong></p>
+<p>In each case the IR and the middle-end provide a portable substrate. The features that differ most
+across micro-architectures are consulted late and through narrow interfaces, or are left entirely
+to the backend.</p>
 <h3 id="5-design-trade-offs"><a class="header" href="#5-design-trade-offs">5. Design Trade-offs</a></h3>
-<p>The middle-end’s refusal to know hardware details buys massive reuse: the same LoopVectorize pass, the same GVN,
-the same inliner, improve C, Rust, and Swift alike, and the resulting IR can be handed to any LLVM backend.</p>
-<p>The cost is that some optimization opportunities are left on the table until later stages, and a few must be handled
-by target-specific passes. A purely target-agnostic middle-end cannot, for example, know that a particular sequence
-will saturate a specific execution port on a particular CPU, nor can it know the exact misprediction penalty of a given
-branch.</p>
+<p>This abstraction of hardware details buys massive reuse: the same LoopVectorize pass, the same GVN,
+the same inliner, improve C, Rust, and Swift alike, and the resulting IR can be handed to any LLVM
+backend.</p>
+<p>The cost is that some optimization opportunities are left on the table until later stages,
+and a few must be handled by target-specific passes. A purely target-agnostic middle-end cannot,
+for example, know that a particular sequence will saturate a specific execution port on a
+particular CPU, nor can it know the exact misprediction penalty of a given branch.</p>
 <p>LLVM accepts this trade-off because the alternative—writing and maintaining separate optimization pipelines for every
 language and every major micro-architecture—reintroduces the N × M problem that Part 1 set out to solve.</p>
 <h3 id="6-the-abstraction-leaks"><a class="header" href="#6-the-abstraction-leaks">6. The Abstraction Leaks</a></h3>
@@ -314,15 +323,21 @@ transformations into <code>-O2</code>, <code>-O3</code>, etc.</li>
 implemented by each backend.</p>
 <h3 id="8-looking-ahead"><a class="header" href="#8-looking-ahead">8. Looking Ahead</a></h3>
 <p>The middle-end can now improve IR without knowing the original language and without knowing most
-micro-architectural details. That IR, however, still describes an ideal machine: infinite registers,
-uniform instructions, and simple control flow.</p>
-<p>Real processors have finite registers, various types and operations, complex calling conventions,
-and idiosyncratic instruction encodings. The next engineering problem is therefore:</p>
+micro-architectural details. That IR, however, still describes an ideal machine: infinite
+registers, uniform instructions, and simple control flow.</p>
+<p>Real processors have finite registers, various specific types and operations, complex
+calling conventions, and idiosyncratic instruction encodings. The next engineering problem is
+therefore:</p>
 <p><strong>How does LLVM turn ideal IR instructions into legal machine instructions for many different ISAs without forcing the middle-end to know about those ISAs?</strong></p>
 <p>That problem forces the introduction of instruction selection and Machine IR — the subject of Part 4.</p>
 <h3 id="design-principle-3--optimize-against-a-simplified-model"><a class="header" href="#design-principle-3--optimize-against-a-simplified-model">Design Principle #3 — Optimize Against a Simplified Model</a></h3>
-<p>When many different hardware implementations must be supported, perform the bulk of optimization against a simplified, mostly hardware-agnostic model, and consult detailed target information only through narrow, explicit interfaces.</p>
-<p>LLVM IR erases finite registers, pipeline structure, branch-predictor behavior, and most memory-reordering details so that the same passes can serve many languages and many architectures. The few facts that must be known are obtained through DataLayout, TTI, and TLI. Everything else is deferred until the backend, where target-specific knowledge is unavoidable.</p>
+<p>When many different hardware implementations must be supported, perform the bulk of optimization
+against a simplified, mostly hardware-agnostic model, and consult detailed target information only
+through narrow, explicit interfaces.</p>
+<p>LLVM IR erases finite registers, pipeline structure, branch-predictor behavior, and most
+memory-reordering details so that the same passes can serve many languages and many architectures.
+The few facts that must be known are obtained through DataLayout, TTI, and TLI. Everything else is
+deferred until the backend, where target-specific knowledge is unavoidable.</p>
 <h3 id="series-thread"><a class="header" href="#series-thread">Series Thread</a></h3>
 <p>Every abstraction in LLVM exists because the previous one could not adequately contain a particular form of complexity.</p>
 <ul>
@@ -331,9 +346,9 @@ and idiosyncratic instruction encodings. The next engineering problem is therefo
 <li>Language-specific or architecture-specific optimizers could not be reused → a middle-end that operates
 on a simplified, mostly target-independent model of the IR (Part 3).</li>
 </ul>
-<p>The next abstraction will confront the fact that this simplified model must eventually be reconciled with the
-messy reality of actual instruction sets.</p>
-<footer id="last-change">Last change: <time datetime="2026-08-22">2026-08-22</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/26e912d">26e912d</a></footer>
+<p>The next abstraction will confront the fact that this simplified model must eventually be
+reconciled with the chaotic reality of actual instruction sets.</p>
+<footer id="last-change">Last change: <time datetime="2026-08-24">2026-08-24</time>, commit: <a href="https://github.com/KwachOjunga/into-the-dungeon/commit/b7088ab">b7088ab</a></footer>
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
